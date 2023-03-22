@@ -1,0 +1,24 @@
+{% extends "match-form.html" %}
+
+{% block content %}
+    <form method="POST" enctype="multipart/form-data" class="justify-content-center">
+        {{ form.csrf_token }}
+        <div class="row justify-content-center container">
+            <div class="col-lg-6 card p-2">
+                <h5 class="card-title fw-bold mb-0">BECOME A MEMBER</h5>
+                <hr>
+                <div class="input-group mb-3">
+                    {{ form.name.label(class_="input-group-text") }} {{ form.name(class_="form-control") }}
+                </div>
+                <div class="input-group mb-3">
+                    {{ form.phone_no.label(class_="input-group-text") }} {{ form.phone_no(class_="form-control") }}
+                </div>
+                <div class="input-group mb-3">
+                    {{ form.experience.label(class_="input-group-text") }} {{ form.experience(class_="form-control") }}
+                </div>
+                <hr>
+                {{ form.submit(class_="btn btn-dark") }}
+            </div>
+        </div>
+    </form>
+{% endblock %}

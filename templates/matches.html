@@ -1,0 +1,31 @@
+{% extends "match-form.html" %}
+
+{% block content %}
+<form class="justify-content-center">
+    <div class="row justify-content-center container">
+        <div class="col-lg-6 card p-2 justify-content-center mb-5">
+            <h5 class="card-title fw-bold mb-0">MATCHES</h5>
+            <hr>
+            <ul>
+                {% for i in range(length) %}
+                    {% if not matches[i].is_challenge %}
+                        {% if no_of_players[i] == 4 %}
+                            <li class="text-start"><span class="fw-bold">{{ matches[i].week.year.year }} Week {{ matches[i].week.number }}:</span> {{ matches[i].players[0].name }}/{{ matches[i].players[1].name }} {{ matches[i].score1 }} - {{ matches[i].score2 }} {{ matches[i].players[2].name }}/{{ matches[i].players[3].name }} <a href="/ladder-match-doubles?match_id={{ matches[i].id }}"><i class="fa-solid fa-pen-to-square blue"></i></a> <a href="/delete-match/{{ matches[i].id }}"><i class="fa-solid fa-trash blue"></i></a></li>
+                        {% elif no_of_players[i] == 2 %}
+                            <li class="text-start"><span class="fw-bold">{{ matches[i].week.year.year }} Week {{ matches[i].week.number }}:</span> {{ matches[i].players[0].name }} {{ matches[i].score1 }} - {{ matches[i].score2 }} {{ matches[i].players[1].name }} <a href="/ladder-match-singles?match_id={{ matches[i].id }}"><i class="fa-solid fa-pen-to-square blue"></i></a> <a href="/delete-match/{{ matches[i].id }}"><i class="fa-solid fa-trash blue"></i></a></li>
+                        {% endif %}
+                    {% else %}
+                        {% if matches[i].set3_score1 %}
+                            <li class="text-start"><span class="fw-bold">{{ matches[i].week.year.year }} Week {{ matches[i].week.number }}:</span> {{ matches[i].players[0].name }} vs {{ matches[i].players[1].name }} {{ matches[i].score1 }} - {{ matches[i].score2 }} {{ matches[i].set2_score1 }} - {{ matches[i].set2_score2 }} {{ matches[i].set3_score1 }} - {{ matches[i].set3_score2 }} <a href="/challenge-match?match_id={{ matches[i].id }}"><i class="fa-solid fa-pen-to-square blue"></i></a> <a href="/delete-match/{{ matches[i].id }}"><i class="fa-solid fa-trash blue"></i></a></li>
+                        {% elif matches[i].set2_score1 %}
+                            <li class="text-start"><span class="fw-bold">{{ matches[i].week.year.year }} Week {{ matches[i].week.number }}:</span> {{ matches[i].players[0].name }} vs {{ matches[i].players[1].name }} {{ matches[i].score1 }} - {{ matches[i].score2 }} {{ matches[i].set2_score1 }} - {{ matches[i].set2_score2 }} <a href="/challenge-match?match_id={{ matches[i].id }}"><i class="fa-solid fa-pen-to-square blue"></i></a> <a href="/delete-match/{{ matches[i].id }}"><i class="fa-solid fa-trash blue"></i></a></li>
+                        {% else %}
+                            <li class="text-start"><span class="fw-bold">{{ matches[i].week.year.year }} Week {{ matches[i].week.number }}:</span> {{ matches[i].players[0].name }} vs {{ matches[i].players[1].name }} {{ matches[i].score1 }} - {{ matches[i].score2 }} <a href="/challenge-match?match_id={{ matches[i].id }}"><i class="fa-solid fa-pen-to-square blue"></i></a> <a href="/delete-match/{{ matches[i].id }}"><i class="fa-solid fa-trash blue"></i></a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</form>
+{% endblock %}

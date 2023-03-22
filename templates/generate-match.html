@@ -1,0 +1,51 @@
+{% extends "match-form.html" %}
+
+{% block content %}
+    <form method="POST" enctype="multipart/form-data" class="justify-content-center">
+        <div class="row justify-content-center container">
+            <div class="col-lg-6 card p-2 justify-content-center">
+                <h5 class="card-title fw-bold mb-0">GENERATE MATCH</h5>
+                <hr>
+                <div class="row">
+                    <div class="col text-end">
+                        <div class="checkbox-inline">
+                          <input class="form-check-input" type="radio" name="match-type" id="inlineRadio1" value="singles">
+                          <label class="form-check-label" for="inlineRadio1">Singles</label>
+                        </div>
+                    </div>
+                    <div class="col text-start">
+                        <div class="checkbox-inline">
+                          <input class="form-check-input" type="radio" name="match-type" id="inlineRadio2" value="doubles" checked>
+                          <label class="form-check-label" for="inlineRadio2">Doubles</label>
+                        </div>
+                    </div>
+                </div>
+                <h6 class="mt-3 fw-bold">Tick the available players:</h6>
+                <div class="row justify-content-center">
+                    <div class="col-4 text-start">
+                        {% for i in range(cut) %}
+                            <div class="checkbox-inline">
+                              <input class="form-check-input" type="checkbox" name="{{ players[i] }}" id="flexCheckDefault{{ i + 1 }}">
+                              <label class="form-check-label" for="flexCheckDefault{{ i + 1 }}">
+                                {{ players[i] }}
+                              </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-4 text-start">
+                        {% for i in range(cut, length) %}
+                            <div class="checkbox-inline">
+                              <input class="form-check-input" type="checkbox" name="{{ players[i] }}" id="flexCheckDefault{{ i + 1 }}">
+                              <label class="form-check-label" for="flexCheckDefault{{ i + 1 }}">
+                                {{ players[i] }}
+                              </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <hr>
+                <input class="btn btn-dark" id="submit" name="submit" type="submit" value="Generate">
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>LASUSTENNIS CLUB</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicons/favicon.ico">
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/index.js') }}" charset="utf-8" defer></script>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Climate+Crisis&family=Fredoka:wght@700&family=Lobster+Two:ital,wght@1,700&family=Noto+Sans+JP&family=Roboto+Condensed:ital,wght@1,700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <script defer src="https://use.fontawesome.com/releases/v6.2.1/js/all.js"></script>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+
+  </head>
+  <body>
+    <div class="text-center">
+      <nav class="stats-nav">
+        <p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span></p>
+      </nav>
+      <div class="container my-3">
+        <div class="row justify-content-center container text-start mx-1">
+          <div class="col-lg-5 col-md-6 my-2">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><b>UPLOAD LADDER MATCH (SINGLES)</b></h5>
+                <p class="card-text">Click the button below to upload the scores of a singles ladder match</p>
+                <a href="/ladder-match-singles" class="btn btn-dark">Proceed</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-6 my-2">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><b>UPLOAD LADDER MATCH (DOUBLES)</b></h5>
+                <p class="card-text">Click the button below to upload the scores of a doubles ladder match</p>
+                <a href="/ladder-match-doubles" class="btn btn-dark">Proceed</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-6 my-2">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><b>GENERATE MATCH</b></h5>
+                <p class="card-text">Click the button below to generate a completely randomized match</p>
+                <a href="/generate-match" class="btn btn-dark">Proceed</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-6 my-2">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><b>UPLOAD CHALLENGE MATCH</b></h5>
+                <p class="card-text">Click the button below to upload the scores of a challenge match</p>
+                <a href="/challenge-match" class="btn btn-dark">Proceed</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-6 my-2">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><b>ADD NEW PLAYER</b></h5>
+                <p class="card-text">Click the button below to add a new player to the ladder games</p>
+                <a href="/add-player" class="btn btn-dark">Proceed</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-6 my-2">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title"><b>EDIT/DELETE MATCH</b></h5>
+                <p class="card-text">Click the button below to edit/delete an already-uploaded match</p>
+                <a href="/matches" class="btn btn-dark">Proceed</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
