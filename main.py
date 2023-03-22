@@ -97,6 +97,8 @@ class Year(db.Model):
     weeks = relationship("Week", back_populates="year")
 
 
+with app.app_context():
+    db.create_all()
 MATCHES_PLAYED = len(Match.query.all())
 
 
