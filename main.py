@@ -113,9 +113,7 @@ class Year(db.Model):
 
 with app.app_context():
     db.create_all()
-    admin_user = User()
-    admin_user.username = USERNAME
-    admin_user.password = PASSWORD
+    admin_user = User(username=USERNAME, password=PASSWORD)
     db.session.add(admin_user)
     db.session.commit()
 
