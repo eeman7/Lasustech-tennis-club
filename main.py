@@ -111,11 +111,8 @@ class Year(db.Model):
     weeks = relationship("Week", back_populates="year")
 
 
-with app.app_context():
-    db.create_all()
-    admin_user = User(username=USERNAME, password=PASSWORD)
-    db.session.add(admin_user)
-    db.session.commit()
+# with app.app_context():
+#     db.create_all()
 
 
 # Forms
@@ -169,7 +166,11 @@ class LoginForm(FlaskForm):
 
 def get_weekly_points():
     weekly_points = {}
-    for week in Year.query.filter_by(year=datetime.datetime.now().year).first().weeks:
+    try:
+        weeks = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
+    except AttributeError:
+        weeks = []
+    for week in weeks:
         all_player_points = {}
         with app.app_context():
             players = Player.query.all()
@@ -381,34 +382,47 @@ def ladder_games():
 
         cumulative_weekly_points_with_players = get_cwp_with_players(get_weekly_points())
 
-        weeks_in_year = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
-        if len(weeks_in_year) > 1:
-            previous_week = weeks_in_year[-2].number
+        try:
+            weeks_in_year = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
+        except AttributeError:
+            pass
         else:
-            previous_week = weeks_in_year[0].number
-        previous_week_arrangement = [
-            name for name in dict(
-                sorted(
-                    cumulative_weekly_points_with_players[f"Wk {previous_week}"].items(), key=lambda x: x[1]
-                )
-            )
-        ][::-1]
-
-        for player in players_in_order:
-            if not player.position:
-                player.position = players_in_order.index(player) + 1
-                player.shift = 0
+            if len(weeks_in_year) > 1:
+                previous_week = weeks_in_year[-2].number
             else:
-                player.position = players_in_order.index(player) + 1
-                player.shift = (previous_week_arrangement.index(player.name) + 1) - player.position
-        db.session.commit()
-    players = Player.query.order_by(Player.points).all()[::-1]
-    weeks = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks[::-1]
-    no_of_weeks = len(weeks)
-    no_of_matches = [len(week.matches) for week in weeks]
-    players_in_matches = [[len(match.players) for match in week.matches] for week in weeks]
-    match_players = [[match.players_order.split() for match in week.matches] for week in weeks]
-    games_played = [len(player.matches) for player in players]
+                previous_week = weeks_in_year[0].number
+            previous_week_arrangement = [
+                name for name in dict(
+                    sorted(
+                        cumulative_weekly_points_with_players[f"Wk {previous_week}"].items(), key=lambda x: x[1]
+                    )
+                )
+            ][::-1]
+
+            for player in players_in_order:
+                if not player.position:
+                    player.position = players_in_order.index(player) + 1
+                    player.shift = 0
+                else:
+                    player.position = players_in_order.index(player) + 1
+                    player.shift = (previous_week_arrangement.index(player.name) + 1) - player.position
+            db.session.commit()
+    try:
+        players = Player.query.order_by(Player.points).all()[::-1]
+        weeks = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks[::-1]
+        no_of_weeks = len(weeks)
+        no_of_matches = [len(week.matches) for week in weeks]
+        players_in_matches = [[len(match.players) for match in week.matches] for week in weeks]
+        match_players = [[match.players_order.split() for match in week.matches] for week in weeks]
+        games_played = [len(player.matches) for player in players]
+    except AttributeError:
+        players = []
+        weeks = []
+        no_of_weeks = len(weeks)
+        no_of_matches = []
+        players_in_matches = [[]]
+        match_players = [[]]
+        games_played = []
 
     return render_template(
         "ladder-games.html",
