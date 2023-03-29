@@ -3,22 +3,33 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
+import psycopg2
 import random
 from dotenv import load_dotenv
-from flask import Flask, render_template, url_for, redirect, request, make_response
+from flask import Flask, flash, render_template, url_for, redirect, request
 from flask_bootstrap import Bootstrap
+from flask_login import UserMixin, login_user, LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from functools import wraps
 from math import ceil
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash
-from wtforms import StringField, SubmitField, IntegerField, SelectField
+from wtforms import StringField, SubmitField, IntegerField, SelectField, PasswordField
 from wtforms.validators import DataRequired
+
+login_manager = LoginManager()
 
 app = Flask(__name__)
 Bootstrap(app)
 load_dotenv()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
 
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
@@ -33,15 +44,17 @@ COLORS = ['#FFF200', '#F7FF00', '#E1FF00', '#CCFF00', '#B7FF00', '#A2FF00', '#8C
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        auth = request.authorization
-        if auth and auth['username'] == USERNAME and check_password_hash(PASSWORD, auth['password']):
-            return f(*args, **kwargs)
-        return make_response(
-            'Could not verify your access level for that URL.\nYou have to login with proper username and password',
-            401,
-            {'WWW-Authenticate': 'Basic realm="Login Required"'}
-        )
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
     return decorated_function
+
+
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(250), nullable=False)
+    password = db.Column(db.String(250), nullable=False)
 
 
 class PlayerMatch(db.Model):
@@ -68,6 +81,7 @@ class Match(db.Model):
     __tablename__ = "match"
     id = db.Column(db.Integer, primary_key=True)
     players = relationship("Player", secondary="player_match", back_populates="matches")
+    players_order = db.Column(db.String(250), nullable=False)
     score1 = db.Column(db.Integer, nullable=False)
     score2 = db.Column(db.Integer, nullable=False)
     set2_score1 = db.Column(db.Integer)
@@ -99,7 +113,11 @@ class Year(db.Model):
 
 with app.app_context():
     db.create_all()
-    MATCHES_PLAYED = len(Match.query.all())
+    admin_user = User()
+    admin_user.username = USERNAME
+    admin_user.password = PASSWORD
+    db.session.add(admin_user)
+    db.session.commit()
 
 
 # Forms
@@ -145,6 +163,12 @@ class JoinForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Log In')
+
+
 def get_weekly_points():
     weekly_points = {}
     for week in Year.query.filter_by(year=datetime.datetime.now().year).first().weeks:
@@ -153,18 +177,23 @@ def get_weekly_points():
             players = Player.query.all()
         for player in players:
             player_points = 0
-            for match in player.matches:
+            try:
+                player_matches = player.matches
+            except:
+                player_matches = []
+            for match in player_matches:
                 if match in week.matches:
+                    match_players = match.players_order.split()
                     if not match.is_challenge:
-                        if len(match.players) == 4:
-                            if match.players[0] == player or match.players[1] == player:
+                        if len(match_players) == 4:
+                            if match_players[0] == player.name or match_players[1] == player.name:
                                 player_points += match.score1
-                            elif match.players[2] == player or match.players[3] == player:
+                            elif match_players[2] == player.name or match_players[3] == player.name:
                                 player_points += match.score2
-                        elif len(match.players) == 2:
-                            if match.players[0] == player:
+                        elif len(match_players) == 2:
+                            if match_players[0] == player.name:
                                 player_points += match.score1
-                            elif match.players[1] == player:
+                            elif match_players[1] == player.name:
                                 player_points += match.score2
                     else:
                         first_player_sets = 0
@@ -183,10 +212,10 @@ def get_weekly_points():
                             else:
                                 second_player_sets += 1
                         if first_player_sets > second_player_sets:
-                            if player == match.players[0]:
+                            if player.name == match_players[0]:
                                 player_points += match.points_gained
                         else:
-                            if player == match.players[1]:
+                            if player.name == match_players[1]:
                                 player_points += match.points_gained
             all_player_points[player.name] = player_points
         weekly_points[f"Wk {week.number}"] = all_player_points
@@ -281,14 +310,24 @@ def plot_mpw(dic):
     plt.savefig('static/images/mpw.png', dpi=1000)
 
 
-def del_match(match):
+def create_visuals():
+    weekly_points = get_weekly_points()
+    cumulative_weekly_points = get_cumulative_weekly_points(weekly_points)
+    weekly_points_df = get_weekly_points_df(cumulative_weekly_points)
+    ppg = get_ppg()
+    plot_cwp(weekly_points_df)
+    plot_ppg(ppg)
+    plot_mpw(weekly_points)
+
+
+def del_match(match_id):
     with app.app_context():
+        match = Match.query.get(match_id)
+        match_players = match.players_order.split()
         if match.is_challenge:
-            player2 = Player.query.get(match.players[-1].id)
-            match.players.remove(player2)
+            player2 = Player.query.filter_by(name=match_players[-1]).first()
             player2.challenge_matches -= 1
-            player1 = Player.query.get(match.players[-1].id)
-            match.players.remove(player1)
+            player1 = Player.query.filter_by(name=match_players[-1]).first()
             player1.challenge_matches -= 1
             first_player_sets = 0
             second_player_sets = 0
@@ -312,26 +351,22 @@ def del_match(match):
                 player2.challenge_points -= match.points_gained
                 player2.points -= match.points_gained
         else:
-            if len(match.players) == 4:
-                player4 = Player.query.get(match.players[-1].id)
-                match.players.remove(player4)
+            if len(match_players) == 4:
+                player4 = Player.query.filter_by(name=match_players[-1]).first()
                 player4.points = player4.points - match.score2
-                player3 = Player.query.get(match.players[-1].id)
-                match.players.remove(player3)
+                player3 = Player.query.filter_by(name=match_players[-1]).first()
                 player3.points = player3.points - match.score2
-                player2 = Player.query.get(match.players[-1].id)
-                match.players.remove(player2)
+                player2 = Player.query.filter_by(name=match_players[-1]).first()
                 player2.points = player2.points - match.score1
-                player1 = Player.query.get(match.players[-1].id)
-                match.players.remove(player1)
+                player1 = Player.query.filter_by(name=match_players[-1]).first()
                 player1.points = player1.points - match.score1
-            elif len(match.players) == 2:
-                player2 = Player.query.get(match.players[-1].id)
-                match.players.remove(player2)
+            elif len(match_players) == 2:
+                player2 = Player.query.filter_by(name=match_players[-1]).first()
                 player2.points = player2.points - match.score2
-                player1 = Player.query.get(match.players[-1].id)
-                match.players.remove(player1)
+                player1 = Player.query.filter_by(name=match_players[-1]).first()
                 player1.points = player1.points - match.score1
+        for player in match.players:
+            match_players.remove(player)
         db.session.delete(match)
         db.session.commit()
 
@@ -343,24 +378,16 @@ def home():
 
 @app.route("/ladder-games")
 def ladder_games():
-    global MATCHES_PLAYED
     with app.app_context():
         players_in_order = Player.query.order_by(Player.points).all()[::-1]
 
-        if MATCHES_PLAYED != len(Match.query.all()):
-            weekly_points = get_weekly_points()
-            cumulative_weekly_points = get_cumulative_weekly_points(weekly_points)
-            weekly_points_df = get_weekly_points_df(cumulative_weekly_points)
-            ppg = get_ppg()
-
-            plot_cwp(weekly_points_df)
-            plot_ppg(ppg)
-            plot_mpw(weekly_points)
-            MATCHES_PLAYED = len(Match.query.all())
-
         cumulative_weekly_points_with_players = get_cwp_with_players(get_weekly_points())
 
-        previous_week = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks[-2].number
+        weeks_in_year = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
+        if len(weeks_in_year) > 1:
+            previous_week = weeks_in_year[-2].number
+        else:
+            previous_week = weeks_in_year[0].number
         previous_week_arrangement = [
             name for name in dict(
                 sorted(
@@ -369,11 +396,6 @@ def ladder_games():
             )
         ][::-1]
 
-        games_played = [len(player.matches) for player in players_in_order]
-        weeks = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks[::-1]
-        no_of_weeks = len(weeks)
-        no_of_matches = [len(week.matches) for week in weeks]
-        players_in_matches = [[len(match.players) for match in week.matches] for week in weeks]
         for player in players_in_order:
             if not player.position:
                 player.position = players_in_order.index(player) + 1
@@ -382,16 +404,24 @@ def ladder_games():
                 player.position = players_in_order.index(player) + 1
                 player.shift = (previous_week_arrangement.index(player.name) + 1) - player.position
         db.session.commit()
+    players = Player.query.order_by(Player.points).all()[::-1]
+    weeks = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks[::-1]
+    no_of_weeks = len(weeks)
+    no_of_matches = [len(week.matches) for week in weeks]
+    players_in_matches = [[len(match.players) for match in week.matches] for week in weeks]
+    match_players = [[match.players_order.split() for match in week.matches] for week in weeks]
+    games_played = [len(player.matches) for player in players]
 
     return render_template(
         "ladder-games.html",
-        players=players_in_order,
+        players=players,
         games=games_played,
-        no_of_players=len(players_in_order),
+        no_of_players=len(players),
         weeks=weeks,
         no_of_weeks=no_of_weeks,
         no_of_matches=no_of_matches,
-        players_in_matches=players_in_matches
+        players_in_matches=players_in_matches,
+        match_players=match_players
     )
 
 
@@ -410,6 +440,26 @@ def join():
     return render_template("join.html", form=form)
 
 
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if request.method == 'POST':
+        username = form.username.data
+        password = form.password.data
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if check_password_hash(user.password, password):
+                login_user(user)
+                return redirect(url_for('admin'))
+            else:
+                flash("Password incorrect, please try again.")
+                redirect(url_for('login'))
+        else:
+            flash("Username incorrect, please try again.")
+            redirect(url_for('login'))
+    return render_template("login.html", form=form)
+
+
 @app.route("/admin")
 @admin_only
 def admin():
@@ -422,11 +472,11 @@ def singles_ladder_match():
     p1 = request.args.get('p1')
     p2 = request.args.get('p2')
     if request.args.get('match_id'):
-        with app.app_context():
-            match = Match.query.get(request.args.get('match_id'))
+        match = Match.query.get(request.args.get('match_id'))
+        match_players = match.players_order.split()
         form = LadderGameForm(
-            player_1=match.players[0].name,
-            player_2=match.players[1].name,
+            player_1=match_players[0],
+            player_2=match_players[1],
             score_1=match.score1,
             score_2=match.score2,
             week=match.week.number,
@@ -442,7 +492,7 @@ def singles_ladder_match():
     form.player_4.choices = player_names
     if request.method == 'POST':
         if request.args.get('match_id'):
-            del_match(match)
+            del_match(match.id)
         player_1 = form.player_1.data
         player_2 = form.player_2.data
         score_1 = form.score_1.data
@@ -457,8 +507,12 @@ def singles_ladder_match():
             player2 = Player.query.filter_by(name=player_2).first()
             new_match.players.append(player2)
             player2.points += score_2
+            new_match.players_order = f"{player_1} {player_2}"
             yr = Year.query.filter_by(year=form_year).first()
-            weeks_in_years = [wk.number for wk in yr.weeks]
+            if len(yr.weeks) > 0:
+                weeks_in_years = [wk.number for wk in yr.weeks]
+            else:
+                weeks_in_years = []
             if week in weeks_in_years:
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
@@ -493,13 +547,13 @@ def doubles_ladder_match():
     p3 = request.args.get('p3')
     p4 = request.args.get('p4')
     if request.args.get('match_id'):
-        with app.app_context():
-            match = Match.query.get(request.args.get('match_id'))
+        match = Match.query.get(request.args.get('match_id'))
+        match_players = match.players_order.split()
         form = LadderGameForm(
-            player_1=match.players[0].name,
-            player_2=match.players[1].name,
-            player_3=match.players[2].name,
-            player_4=match.players[3].name,
+            player_1=match_players[0],
+            player_2=match_players[1],
+            player_3=match_players[2],
+            player_4=match_players[3],
             score_1=match.score1,
             score_2=match.score2,
             week=match.week.number,
@@ -515,7 +569,7 @@ def doubles_ladder_match():
     form.player_4.choices = player_names
     if request.method == 'POST':
         if request.args.get('match_id'):
-            del_match(match)
+            del_match(match.id)
         player_1 = form.player_1.data
         player_2 = form.player_2.data
         player_3 = form.player_3.data
@@ -525,6 +579,8 @@ def doubles_ladder_match():
         week = form.week.data
         form_year = form.year.data
         with app.app_context():
+            # week2 = Week.query.filter_by(number=2).first()
+            # week2.first_saturday = "11 February"
             new_match = Match(score1=score_1, score2=score_2, is_challenge=False)
             player1 = Player.query.filter_by(name=player_1).first()
             new_match.players.append(player1)
@@ -538,8 +594,12 @@ def doubles_ladder_match():
             player4 = Player.query.filter_by(name=player_4).first()
             new_match.players.append(player4)
             player4.points += score_2
+            new_match.players_order = f"{player_1} {player_2} {player_3} {player_4}"
             yr = Year.query.filter_by(year=form_year).first()
-            weeks_in_years = [wk.number for wk in yr.weeks]
+            if len(yr.weeks) > 0:
+                weeks_in_years = [wk.number for wk in yr.weeks]
+            else:
+                weeks_in_years = []
             if week in weeks_in_years:
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
@@ -569,8 +629,7 @@ def doubles_ladder_match():
 @app.route("/generate-match", methods=['GET', 'POST'])
 @admin_only
 def generate_match():
-    with app.app_context():
-        players = sorted([player.name for player in Player.query.all()])
+    players = sorted([player.name for player in Player.query.all()])
     if request.method == 'POST':
         try:
             match_type = request.form['match-type']
@@ -615,11 +674,11 @@ def generate_match():
 @admin_only
 def challenge_match():
     if request.args.get('match_id'):
-        with app.app_context():
-            match = Match.query.get(request.args.get('match_id'))
+        match = Match.query.get(request.args.get('match_id'))
+        match_players = match.players_order.split()
         form = ChallengeGameForm(
-            player_1=match.players[0].name,
-            player_2=match.players[1].name,
+            player_1=match_players[0],
+            player_2=match_players[1],
             set1_score_1=match.score1,
             set1_score_2=match.score2,
             set2_score_1=match.set2_score1,
@@ -637,7 +696,7 @@ def challenge_match():
     form.player_2.choices = player_names
     if request.method == 'POST':
         if request.args.get('match_id'):
-            del_match(match)
+            del_match(match.id)
         player_1 = form.player_1.data
         player_2 = form.player_2.data
         set1_score_1 = form.set1_score1.data
@@ -657,6 +716,7 @@ def challenge_match():
             second_player = Player.query.filter_by(name=player_2).first()
             new_match.players.append(second_player)
             second_player.challenge_matches += 1
+            new_match.players_order = f"{player_1} {player_2}"
             first_player_sets = 0
             second_player_sets = 0
             if set1_score_1 > set1_score_2:
@@ -683,7 +743,10 @@ def challenge_match():
                     second_player.challenge_points = new_match.points_gained
                     second_player.points = first_player.points
             yr = Year.query.filter_by(year=form_year).first()
-            weeks_in_years = [wk.number for wk in yr.weeks]
+            if len(yr.weeks) > 0:
+                weeks_in_years = [wk.number for wk in yr.weeks]
+            else:
+                weeks_in_years = []
             if week in weeks_in_years:
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
@@ -719,7 +782,7 @@ def add_player():
         full_name = form.full_name.data
         with app.app_context():
             new_player = Player(name=name, full_name=full_name, points=0, challenge_points=0, challenge_matches=0)
-            if form.rank.data is not None:
+            if form.rank.data in range(1, 9):
                 new_player.rank = form.rank.data
             db.session.add(new_player)
             db.session.commit()
@@ -732,15 +795,21 @@ def add_player():
 def matches():
     match_list = Match.query.all()
     no_of_players = [len(match.players) for match in match_list]
-    return render_template("matches.html", matches=match_list, no_of_players=no_of_players, length=len(match_list))
+    match_players = [match.players_order.split() for match in match_list]
+    return render_template(
+        "matches.html",
+        matches=match_list,
+        no_of_players=no_of_players,
+        match_players=match_players,
+        length=len(match_list)
+    )
 
 
 @app.route("/delete-match/<int:match_id>")
 @admin_only
 def delete_match(match_id):
-    with app.app_context():
-        match = Match.query.get(match_id)
-    del_match(match)
+    match = Match.query.get(match_id)
+    del_match(match.id)
     return redirect(url_for("admin"))
 
 
