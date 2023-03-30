@@ -179,6 +179,7 @@ input[type=number] {
     width: 20px;
     height: 20px;
     border: 1px solid;
+    display: inline-block !important;
 }
 
 .green-square {
@@ -225,12 +226,12 @@ input[type=number] {
 
 @media (max-width: 767px) {
   h1 {
-    font-size: 4rem !important;
+    font-size: 3rem !important;
     padding-top: 25% !important;
   }
 
   .tennis-ball {
-    height: 4rem;
+    height: 3rem;
   }
 
   .message {

@@ -137,13 +137,18 @@
                 {% endfor %}
               </tbody>
             </table>
-            <ul class="nav justify-content-center mb-3">
-              <li class="nav-item"><div class="square green-square"></div></li>
-              <li class="nav-item"><span class="info">Playoff seeding</span></li>
-              <li class="nav-item"></li>
-              <li class="nav-item"><div class="square blue-square"></div></li>
-              <li class="nav-item"><span class="info">Playoff qualification</span></li>
-            </ul>
+            <div class="row justify-content-center mb-2">
+              <div class="col-lg-4 text-start">
+                <div class="square green-square me-2"></div>
+                <span class="info">Playoff seeding</span>
+              </div>
+            </div>
+            <div class="row justify-content-center mb-3">
+              <div class="col-lg-4 text-start">
+                <div class="square blue-square me-2"></div>
+                <span class="info">Playoff qualification</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="" id="games" data-tab-info>
@@ -151,7 +156,7 @@
             <h4 class="week mt-3">Week {{ weeks[i].number }} ({{ weeks[i].first_saturday }})</h4>
             <div class="row container mx-1">
               {% for j in range(no_of_matches[i]) %}
-                <div class="col-lg-3 col-md-4 col-6 my-2">
+                <div class="col-lg-3 col-md-6 my-2">
                   {% if not weeks[i].matches[j].is_challenge %}
                     <div class="card container">
                       {% if players_in_matches[i][j] == 4 %}
