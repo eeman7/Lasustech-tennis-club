@@ -2,6 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>LASUSTENNIS LADDER GAMES</title>
 
     <!-- CSS -->
@@ -30,7 +31,7 @@
   <body>
     <div class="stats-div">
       <nav class="stats-nav">
-        <p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span><span class="ladder-games"> Ladder Games 2023</span></p>
+        <a class="link" href="/"><p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span><span class="ladder-games"> Ladder Games 2023</span></p></a>
       </nav>
       <div class="container">
         <header class="d-flex justify-content-center py-3 border-bottom">
@@ -57,12 +58,12 @@
               <tbody class="table-group-divider">
                 {% for i in range(no_of_players) %}
                   {% if 0 <= i <= 3 %}
-                    <tr class="table-success">
+                    <tr class="table-warning">
                       <th scope="row" class="text-end">{{ players[i].position }}</th>
                       {% if players[i].shift > 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-up up"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-up up"></i></td>
                       {% elif players[i].shift < 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-down down"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-down down"></i></td>
                       {% else %}
                         <td class="text-start"><div class="dash"><hr></div></td>
                       {% endif %}
@@ -76,12 +77,12 @@
                       <td>{{ players[i].points }}</td>
                     </tr>
                   {% elif 4 <= i <= 7 %}
-                    <tr class="table-primary">
+                    <tr class="table-secondary">
                       <th scope="row" class="text-end">{{ players[i].position }}</th>
                       {% if players[i].shift > 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-up up"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-up up"></i></td>
                       {% elif players[i].shift < 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-down down"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-down down"></i></td>
                       {% else %}
                         <td class="text-start"><div class="dash"><hr></div></td>
                       {% endif %}
@@ -98,9 +99,9 @@
                     <tr class="border-0">
                       <th scope="row" class="text-end">{{ players[i].position }}</th>
                       {% if players[i].shift > 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-up up"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-up up"></i></td>
                       {% elif players[i].shift < 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-down down"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-down down"></i></td>
                       {% else %}
                         <td class="text-start"><div class="dash"><hr></div></td>
                       {% endif %}
@@ -117,9 +118,9 @@
                     <tr>
                       <th scope="row" class="text-end">{{ players[i].position }}</th>
                       {% if players[i].shift > 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-up up"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-up up"></i></td>
                       {% elif players[i].shift < 0 %}
-                        <td class="text-start"><i class="fa-solid fa-caret-down down"></i></td>
+                        <td class="text-start"><i class="fa-solid fa-angle-down down"></i></td>
                       {% else %}
                         <td class="text-start"><div class="dash"><hr></div></td>
                       {% endif %}
@@ -497,36 +498,65 @@
         </div>
         <div class="" id="stats" data-tab-info>
           <div class="row">
-            <div class="col-lg-6 my-2">
-              <div class="card text-start">
-                <img src="{{ url_for('static', filename='images/cwp.png') }}" class="card-img-top" alt="...">
+            <div class="col-lg-4 col-md-6 my-2">
+              <div class="card text-center container">
+                <h5 class="card-title fw-bold mt-3 mb-0">BEST POINTS PER GAME RATIO</h5>
+                <hr>
                 <div class="card-body">
-                  <h5 class="card-title">POINTS OVERTIME</h5>
-                  <p class="card-text">How each player's points have risen overtime</p>
+                  {% for player in ppg %}
+                    <div class="row">
+                      <div class="col text-start">
+                        <p>{{ player }}</p>
+                      </div>
+                      <div class="col text-end">
+                        <p>{{ ppg[player] }}</p>
+                      </div>
+                    </div>
+                  {% endfor %}
                 </div>
               </div>
             </div>
-            <div class="col-lg-6 my-2">
-              <div class="card text-start">
-                <img src="{{ url_for('static', filename='images/ppg.png') }}" class="card-img-top" alt="...">
+            <div class="col-lg-4 col-md-6 my-2">
+              <div class="card text-center container">
+                <h5 class="card-title fw-bold mt-3 mb-0">MOST POINTS IN A WEEK</h5>
+                <hr>
                 <div class="card-body">
-                  <h5 class="card-title">POINTS PER GAME</h5>
-                  <p class="card-text">Each player's average points per game</p>
+                  {% for player in mpw %}
+                    <div class="row">
+                      <div class="col text-start">
+                        <p>{{ player }}</p>
+                      </div>
+                      <div class="col text-end">
+                        <p>{{ mpw[player] }}</p>
+                      </div>
+                    </div>
+                  {% endfor %}
                 </div>
               </div>
             </div>
-            <div class="col-lg-6 my-2">
-              <div class="card text-start">
-                <img src="{{ url_for('static', filename='images/mpw.png') }}" class="card-img-top" alt="...">
+            <div class="col-lg-4 col-md-6 my-2">
+              <div class="card text-center container">
+                <h5 class="card-title fw-bold mt-3 mb-0">BEST LADDER GAMES WIN RATIO</h5>
+                <hr>
                 <div class="card-body">
-                  <h5 class="card-title">MOST POINTS IN A WEEK</h5>
-                  <p class="card-text">The most points in a week by players</p>
+                  {% for player in wpct %}
+                    <div class="row">
+                      <div class="col text-start">
+                        <p>{{ player }}</p>
+                      </div>
+                      <div class="col text-end">
+                        <p>{{ wpct[player] }}%</p>
+                      </div>
+                    </div>
+                  {% endfor %}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <hr>
+      <p>© LASUSTECH Tennis Club {{ year }}</p>
     </div>
   </body>
 </html>

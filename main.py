@@ -1,9 +1,5 @@
 import datetime
-import matplotlib.pyplot as plt
-import numpy as np
 import os
-import pandas as pd
-import psycopg2
 import random
 from dotenv import load_dotenv
 from flask import Flask, flash, render_template, url_for, redirect, request
@@ -98,7 +94,7 @@ class Week(db.Model):
     __tablename__ = "week"
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer, nullable=False)
-    first_saturday = db.Column(db.String(250), unique=True, nullable=False)
+    first_saturday = db.Column(db.String(250), nullable=False)
     matches = relationship("Match", back_populates="week")
     year = relationship("Year", back_populates="weeks")
     year_id = db.Column(db.Integer, db.ForeignKey('year.id'))
@@ -172,14 +168,10 @@ def get_weekly_points():
         weeks = []
     for week in weeks:
         all_player_points = {}
-        with app.app_context():
-            players = Player.query.all()
+        players = Player.query.all()
         for player in players:
             player_points = 0
-            try:
-                player_matches = player.matches
-            except:
-                player_matches = []
+            player_matches = player.matches
             for match in player_matches:
                 if match in week.matches:
                     match_players = match.players_order.split()
@@ -221,31 +213,8 @@ def get_weekly_points():
     return weekly_points
 
 
-def get_cumulative_weekly_points(weekly_points):
-    with app.app_context():
-        players_in_order = Player.query.order_by(Player.points).all()[::-1]
-    cumulative_weekly_points = {"": [0 for _ in players_in_order]}
-    for i in range(1, len(weekly_points) + 1):
-        cumulative_weekly_points[f"Wk {i}"] = [0 for i in range(len(weekly_points[f"Wk {i}"]))]
-        for j in range(1, i + 1):
-            for k in range(len(cumulative_weekly_points[f"Wk {i}"])):
-                cumulative_weekly_points[f"Wk {i}"][k] += weekly_points[f"Wk {j}"][players_in_order[k].name]
-    return cumulative_weekly_points
-
-
-def get_weekly_points_df(cumulative_weekly_points):
-    with app.app_context():
-        players_in_order = Player.query.order_by(Player.points).all()[::-1]
-    return pd.DataFrame.from_dict(
-        cumulative_weekly_points,
-        orient='index',
-        columns=[player.name for player in players_in_order]
-    )
-
-
 def get_cwp_with_players(weekly_points):
-    with app.app_context():
-        players_in_order = Player.query.order_by(Player.points).all()[::-1]
+    players_in_order = Player.query.order_by(Player.points).all()[::-1]
     cumulative_weekly_points_with_players = {}
     for i in range(1, len(weekly_points) + 1):
         cumulative_weekly_points_with_players[f"Wk {i}"] = {player.name: 0 for player in players_in_order}
@@ -257,66 +226,55 @@ def get_cwp_with_players(weekly_points):
 
 
 def get_ppg():
-    with app.app_context():
-        players_in_order = Player.query.order_by(Player.points).all()[::-1]
+    players_in_order = Player.query.order_by(Player.points).all()[::-1]
     ppg = {}
     for player in players_in_order:
         ppg[player.name] = round(float((player.points - player.challenge_points) / len(player.matches)), 2)
     ppg_in_order = dict(sorted(ppg.items(), key=lambda x: x[1]))
-    return ppg_in_order
-
-
-def plot_cwp(df):
-    plt.figure(figsize=(16, 10), facecolor=random.choice(COLORS))
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.xlabel('Weeks', fontsize=25)
-    plt.ylabel('Points', fontsize=25)
-    plt.plot(df.index, df, linewidth=3)
-    plt.xlim(left=0)
-    plt.ylim(bottom=0)
-    plt.legend(df.columns, fontsize=17)
-    plt.savefig('static/images/cwp.png', dpi=1000)
-
-
-def plot_ppg(dic):
-    plt.figure(figsize=(16, 10), facecolor=random.choice(COLORS))
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.xlabel('Points per game', fontsize=25)
-    for player in dic:
-        bar = plt.barh(player, width=dic[player], color='#000000')
-        plt.bar_label(bar, padding=3, fontsize=20)
-    plt.savefig('static/images/ppg.png', dpi=1000)
-
-
-def plot_mpw(dic):
-    plt.figure(figsize=(16, 10), facecolor=random.choice(COLORS))
-    plt.ylabel('Points', fontsize=25)
-    plt.xticks(fontsize=15, rotation=15)
-    plt.yticks(fontsize=18)
-    plt.yticks(np.arange(0, 25, step=2))
+    ppg_in_order = dict(reversed(list(ppg_in_order.items())))
+    top_5 = {}
     n = 0
-    for i in range(25, 0, -1):
-        for week in dic:
-            for player in dic[week]:
-                if dic[week][player] == i:
-                    bar = plt.bar(f"{player}\n({week})", height=dic[week][player], color='#000000')
-                    plt.bar_label(bar, padding=3, fontsize=20)
-                    n += 1
-        if n >= 10:
+    for p in ppg_in_order:
+        top_5[p] = ppg_in_order[p]
+        n += 1
+        if n >= 5:
             break
-    plt.savefig('static/images/mpw.png', dpi=1000)
+    return top_5
 
 
-def create_visuals():
-    weekly_points = get_weekly_points()
-    cumulative_weekly_points = get_cumulative_weekly_points(weekly_points)
-    weekly_points_df = get_weekly_points_df(cumulative_weekly_points)
-    ppg = get_ppg()
-    plot_cwp(weekly_points_df)
-    plot_ppg(ppg)
-    plot_mpw(weekly_points)
+def get_wpct():
+    wpct = {}
+    players = Player.query.all()
+    for player in players:
+        matches_won = 0
+        for match in player.matches:
+            if not match.is_challenge:
+                match_players = match.players_order.split()
+                if len(match_players) == 4:
+                    if player.name == match_players[0] or player.name == match_players[1]:
+                        if match.score1 > match.score2:
+                            matches_won += 1
+                    else:
+                        if match.score1 < match.score2:
+                            matches_won += 1
+                else:
+                    if player.name == match_players[0]:
+                        if match.score1 > match.score2:
+                            matches_won += 1
+                    else:
+                        if match.score1 < match.score2:
+                            matches_won += 1
+        wpct[player.name] = round((matches_won / (len(player.matches) - player.challenge_matches)) * 100, 2)
+    wpct_in_order = dict(sorted(wpct.items(), key=lambda x: x[1]))
+    wpct_in_order = dict(reversed(list(wpct_in_order.items())))
+    top_5 = {}
+    n = 0
+    for p in wpct_in_order:
+        top_5[p] = wpct_in_order[p]
+        n += 1
+        if n >= 5:
+            break
+    return top_5
 
 
 def del_match(match_id):
@@ -365,7 +323,7 @@ def del_match(match_id):
                 player1 = Player.query.filter_by(name=match_players[-1]).first()
                 player1.points = player1.points - match.score1
         for player in match.players:
-            match_players.remove(player)
+            match.players.remove(player)
         db.session.delete(match)
         db.session.commit()
 
@@ -379,8 +337,22 @@ def home():
 def ladder_games():
     with app.app_context():
         players_in_order = Player.query.order_by(Player.points).all()[::-1]
+        points = [player.points for player in players_in_order]
 
-        cumulative_weekly_points_with_players = get_cwp_with_players(get_weekly_points())
+        weekly_points = get_weekly_points()
+        cumulative_weekly_points_with_players = get_cwp_with_players(weekly_points)
+
+        mpw = {}
+        for i in range(25, 0, -1):
+            for week in weekly_points:
+                for player in weekly_points[week]:
+                    if weekly_points[week][player] == i:
+                        mpw[f"{player} ({week})"] = i
+            if len(mpw) >= 5:
+                break
+
+        ppg = get_ppg()
+        wpct = get_wpct()
 
         try:
             weeks_in_year = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
@@ -391,21 +363,20 @@ def ladder_games():
                 previous_week = weeks_in_year[-2].number
             else:
                 previous_week = weeks_in_year[0].number
-            previous_week_arrangement = [
-                name for name in dict(
-                    sorted(
-                        cumulative_weekly_points_with_players[f"Wk {previous_week}"].items(), key=lambda x: x[1]
-                    )
+            pwa = dict(
+                sorted(
+                    cumulative_weekly_points_with_players[f"Wk {previous_week}"].items(), key=lambda x: x[1]
                 )
-            ][::-1]
+            )
+            previous_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {previous_week}"][x] for x in pwa][::-1]
 
             for player in players_in_order:
                 if not player.position:
-                    player.position = players_in_order.index(player) + 1
+                    player.position = points.index(player.points) + 1
                     player.shift = 0
                 else:
-                    player.position = players_in_order.index(player) + 1
-                    player.shift = (previous_week_arrangement.index(player.name) + 1) - player.position
+                    player.position = points.index(player.points) + 1
+                    player.shift = (previous_week_arrangement.index(cumulative_weekly_points_with_players[f"Wk {previous_week}"][player.name]) + 1) - player.position
             db.session.commit()
     try:
         players = Player.query.order_by(Player.points).all()[::-1]
@@ -433,7 +404,11 @@ def ladder_games():
         no_of_weeks=no_of_weeks,
         no_of_matches=no_of_matches,
         players_in_matches=players_in_matches,
-        match_players=match_players
+        match_players=match_players,
+        mpw=mpw,
+        ppg=ppg,
+        wpct=wpct,
+        year=datetime.datetime.now().year
     )
 
 
@@ -521,8 +496,9 @@ def singles_ladder_match():
             player2.points += score_2
             new_match.players_order = f"{player_1} {player_2}"
             yr = Year.query.filter_by(year=form_year).first()
-            if len(yr.weeks) > 0:
-                weeks_in_years = [wk.number for wk in yr.weeks]
+            if yr:
+                yr_weeks = yr.weeks
+                weeks_in_years = [wk.number for wk in yr_weeks]
             else:
                 weeks_in_years = []
             if week in weeks_in_years:
@@ -532,10 +508,12 @@ def singles_ladder_match():
                 weekday = datetime.datetime.now().weekday()
                 if weekday != 5:
                     if weekday > 5:
-                        new_week.first_saturday = (datetime.datetime.now() - datetime.timedelta(days=weekday - 5)).strftime(
+                        new_week.first_saturday = (
+                                    datetime.datetime.now() - datetime.timedelta(days=weekday - 5)).strftime(
                             "%d %B")
                     else:
-                        new_week.first_saturday = (datetime.datetime.now() - datetime.timedelta(days=weekday + 2)).strftime(
+                        new_week.first_saturday = (
+                                    datetime.datetime.now() - datetime.timedelta(days=weekday + 2)).strftime(
                             "%d %B")
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -591,8 +569,6 @@ def doubles_ladder_match():
         week = form.week.data
         form_year = form.year.data
         with app.app_context():
-            # week2 = Week.query.filter_by(number=2).first()
-            # week2.first_saturday = "11 February"
             new_match = Match(score1=score_1, score2=score_2, is_challenge=False)
             player1 = Player.query.filter_by(name=player_1).first()
             new_match.players.append(player1)
@@ -608,8 +584,9 @@ def doubles_ladder_match():
             player4.points += score_2
             new_match.players_order = f"{player_1} {player_2} {player_3} {player_4}"
             yr = Year.query.filter_by(year=form_year).first()
-            if len(yr.weeks) > 0:
-                weeks_in_years = [wk.number for wk in yr.weeks]
+            if yr:
+                yr_weeks = yr.weeks
+                weeks_in_years = [wk.number for wk in yr_weeks]
             else:
                 weeks_in_years = []
             if week in weeks_in_years:

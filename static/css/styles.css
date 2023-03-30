@@ -21,6 +21,10 @@ a {
   text-decoration: none !important;
 }
 
+.link {
+  color: inherit !important;
+}
+
 .main {
   background:linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("../images/bg1.jpg");
   background-size: cover;
@@ -81,6 +85,14 @@ a {
 
 .stats-nav {
   padding: 0.5% 10% !important;
+}
+
+.admin-button {
+    color: black !important;
+}
+
+.white {
+    color: white !important;
 }
 
 .nav {
@@ -160,6 +172,7 @@ input[type=number] {
     border-top: 3px solid;
     width: 10.5px;
     margin: 0;
+    margin-left: 0.08rem;
 }
 
 .square {
@@ -169,11 +182,11 @@ input[type=number] {
 }
 
 .green-square {
-    background-color: #BCD0C7;
+    background-color: #FFF3CD;
 }
 
 .blue-square {
-    background-color: #BACBE6;
+    background-color: #E2E3E5;
 }
 
 .rank {

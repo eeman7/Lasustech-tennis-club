@@ -2,6 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>LASUSTENNIS CLUB</title>
 
     <!-- CSS -->
@@ -36,6 +37,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
           <ul class="navbar-nav ms-auto">
+            {% if current_user.is_authenticated: %}
+              <li class="nav-item">
+                <a class="nav-link active ladder-link" href="/admin">Admin</a>
+              </li>
+            {% endif %}
             <li class="nav-item">
               <a class="nav-link active ladder-link" href="/ladder-games">Ladder Games</a>
             </li>

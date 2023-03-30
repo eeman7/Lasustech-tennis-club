@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>LASUSTENNIS LADDER GAMES</title>
+    <title>LASUSTENNIS CLUB</title>
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
@@ -29,8 +29,39 @@
   </head>
   <body>
     <div class="stats-div">
-      <nav class="stats-nav">
-        <p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span></p>
+      <nav class="stats-nav navbar justify-content-center">
+        <a class="link pe-5" href="/admin"><p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span></p></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-expanded="false" aria-label="Offcanvas">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-start navbar-dark bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title white" id="offcanvasDarkNavbarLabel">LASUSTENNIS ADMIN</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <ul class="navbar-nav text-start flex-grow-1 pe-3">
+              <li class="nav-item">
+                <a class="nav-link" href="/ladder-match-singles">Upload ladder match (Singles)</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/ladder-match-doubles">Upload ladder match (Doubles)</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/generate-match">Generate match</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/challenge-match">Upload challenge match</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/add-player">Add new player</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/matches">Edit/delete match</a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </nav>
       {% block content %} {% endblock %}
     </div>
