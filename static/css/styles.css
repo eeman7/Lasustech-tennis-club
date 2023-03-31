@@ -246,6 +246,14 @@ input[type=number] {
     font-size: 1.5rem !important;
   }
 
+  .remove {
+    display: none !important;
+  }
+
+  .smaller {
+    font-size: 0.85rem !important;
+  }
+
   #games p {
     font-size: 0.8rem !important;
   }

@@ -10,7 +10,7 @@
                 <div class="row justify-content-center">
                     <div class="col-5">
                         <div class="input-group mb-3">
-                            {{ form.player_1.label(class_="input-group-text") }} {{ form.player_1(class_="form-control text-end") }}
+                            {{ form.player_1.label(class_="input-group-text remove") }} {{ form.player_1(class_="form-control text-end") }}
                         </div>
                     </div>
                     <div class="col-1 p-0 vertically-align">
@@ -18,23 +18,27 @@
                     </div>
                     <div class="col-5">
                         <div class="input-group mb-3">
-                            {{ form.player_2(class_="form-control") }} {{ form.player_2.label(class_="input-group-text") }}
+                            {{ form.player_2(class_="form-control") }} {{ form.player_2.label(class_="input-group-text remove") }}
                         </div>
                     </div>
                 </div>
                 <h5>Scores</h5>
-                <div class="input-group input-group-sm mb-3 w-14">
-                    {{ form.score_1(class_="form-control text-end") }}
-                    <span class="input-group-text">-</span>
-                    {{ form.score_2(class_="form-control") }}
+                <div class="row justify-content-center">
+                    <div class="col-lg-3 col-5">
+                        <div class="input-group input-group-sm mb-3">
+                            {{ form.score_1(class_="form-control text-end") }}
+                            <span class="input-group-text">-</span>
+                            {{ form.score_2(class_="form-control") }}
+                        </div>
+                    </div>
                 </div>
                 <div class="row justify-content-center">
-                    <div class="col-3">
+                    <div class="col-lg-3 col-6">
                         <div class="input-group mb-3">
                             {{ form.week.label(class_="input-group-text") }} {{ form.week(class_="form-control") }}
                         </div>
                     </div>
-                    <div class="col-5 pe-5">
+                    <div class="col-lg-5 col-6">
                         <div class="input-group mb-3">
                             {{ form.year.label(class_="input-group-text") }} {{ form.year(class_="form-control") }}
                         </div>

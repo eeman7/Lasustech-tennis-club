@@ -10,10 +10,10 @@
                 <div class="row justify-content-center mb-3">
                     <div class="col">
                         <div class="input-group rounded-top">
-                            {{ form.player_1.label(class_="input-group-text no-bottom-left") }} {{ form.player_1(class_="form-control no-bottom-right text-end") }}
+                            {{ form.player_1.label(class_="input-group-text no-bottom-left remove") }} {{ form.player_1(class_="form-control no-bottom-right text-end") }}
                         </div>
                         <div class="input-group rounded-bottom">
-                            {{ form.player_2.label(class_="input-group-text no-top-left") }} {{ form.player_2(class_="form-control no-top-right text-end") }}
+                            {{ form.player_2.label(class_="input-group-text no-top-left remove") }} {{ form.player_2(class_="form-control no-top-right text-end") }}
                         </div>
                     </div>
                     <div class="col-1 me-2 vertically-align">
@@ -21,26 +21,30 @@
                     </div>
                     <div class="col">
                         <div class="input-group rounded-top">
-                            {{ form.player_3(class_="form-control no-bottom-left") }} {{ form.player_3.label(class_="input-group-text no-bottom-right") }}
+                            {{ form.player_3(class_="form-control no-bottom-left") }} {{ form.player_3.label(class_="input-group-text no-bottom-right remove") }}
                         </div>
                         <div class="input-group rounded-bottom">
-                            {{ form.player_4(class_="form-control no-top-left") }} {{ form.player_4.label(class_="input-group-text no-top-right") }}
+                            {{ form.player_4(class_="form-control no-top-left") }} {{ form.player_4.label(class_="input-group-text no-top-right remove") }}
                         </div>
                     </div>
                 </div>
                 <h5>Scores</h5>
-                <div class="input-group input-group-sm mb-3 w-14">
-                    {{ form.score_1(class_="form-control text-end") }}
-                    <span class="input-group-text">-</span>
-                    {{ form.score_2(class_="form-control") }}
+                <div class="row justify-content-center">
+                    <div class="col-lg-3 col-5">
+                        <div class="input-group input-group-sm mb-3">
+                            {{ form.score_1(class_="form-control text-end") }}
+                            <span class="input-group-text">-</span>
+                            {{ form.score_2(class_="form-control") }}
+                        </div>
+                    </div>
                 </div>
                 <div class="row justify-content-center">
-                    <div class="col-3">
+                    <div class="col-lg-3 col-6">
                         <div class="input-group mb-3">
                             {{ form.week.label(class_="input-group-text") }} {{ form.week(class_="form-control") }}
                         </div>
                     </div>
-                    <div class="col-5 pe-5">
+                    <div class="col-lg-5 col-6">
                         <div class="input-group mb-3">
                             {{ form.year.label(class_="input-group-text") }} {{ form.year(class_="form-control") }}
                         </div>
