@@ -215,7 +215,7 @@ def get_weekly_points():
 
 def get_cwp_with_players(weekly_points):
     players_in_order = Player.query.order_by(Player.points).all()[::-1]
-    cumulative_weekly_points_with_players = {}
+    cumulative_weekly_points_with_players = {"Wk 0": {player.name: 0 for player in players_in_order}}
     for i in range(1, len(weekly_points) + 1):
         cumulative_weekly_points_with_players[f"Wk {i}"] = {player.name: 0 for player in players_in_order}
         for j in range(1, i + 1):
@@ -336,8 +336,7 @@ def home():
 @app.route("/ladder-games")
 def ladder_games():
     with app.app_context():
-        players_in_order = Player.query.order_by(Player.points).all()[::-1]
-        points = [player.points for player in players_in_order]
+        players = Player.query.all()
 
         weekly_points = get_weekly_points()
         cumulative_weekly_points_with_players = get_cwp_with_players(weekly_points)
@@ -361,22 +360,53 @@ def ladder_games():
         else:
             if len(weeks_in_year) > 1:
                 previous_week = weeks_in_year[-2].number
+            elif len(weeks_in_year) == 1:
+                previous_week = 0
             else:
-                previous_week = weeks_in_year[0].number
-            pwa = dict(
-                sorted(
-                    cumulative_weekly_points_with_players[f"Wk {previous_week}"].items(), key=lambda x: x[1]
-                )
-            )
-            previous_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {previous_week}"][x] for x in pwa][::-1]
+                previous_week = -1
 
-            for player in players_in_order:
+            current_week = previous_week + 1
+            if previous_week >= 0:
+                pwa = dict(
+                    sorted(
+                        cumulative_weekly_points_with_players[f"Wk {previous_week}"].items(), key=lambda x: x[1]
+                    )
+                )
+                previous_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {previous_week}"][x] for x in pwa][::-1]
+
+                cwa = dict(
+                    sorted(
+                        cumulative_weekly_points_with_players[f"Wk {current_week}"].items(), key=lambda x: x[1]
+                    )
+                )
+                current_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {current_week}"][x] for x in cwa][
+                                            ::-1]
+            else:
+                pwa = dict(
+                    sorted(
+                        cumulative_weekly_points_with_players[f"Wk 0"].items(), key=lambda x: x[1]
+                    )
+                )
+                previous_week_arrangement = [cumulative_weekly_points_with_players[f"Wk 0"][x] for x in
+                                             pwa][::-1]
+
+                cwa = dict(
+                    sorted(
+                        cumulative_weekly_points_with_players[f"Wk {current_week}"].items(), key=lambda x: x[1]
+                    )
+                )
+                current_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {current_week}"][x] for x in
+                                            cwa][
+                                           ::-1]
+
+            for player in players:
                 if not player.position:
-                    player.position = points.index(player.points) + 1
+                    player.position = current_week_arrangement.index(cumulative_weekly_points_with_players[f"Wk {current_week}"][player.name]) + 1
                     player.shift = 0
                 else:
-                    player.position = points.index(player.points) + 1
+                    player.position = current_week_arrangement.index(cumulative_weekly_points_with_players[f"Wk {current_week}"][player.name]) + 1
                     player.shift = (previous_week_arrangement.index(cumulative_weekly_points_with_players[f"Wk {previous_week}"][player.name]) + 1) - player.position
+                player.points = cumulative_weekly_points_with_players[f"Wk {current_week}"][player.name]
             db.session.commit()
     try:
         players = Player.query.order_by(Player.points).all()[::-1]
