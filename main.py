@@ -754,12 +754,12 @@ def challenge_match():
             if first_player_sets > second_player_sets:
                 if first_player.points < second_player.points:
                     new_match.points_gained = second_player.points - first_player.points
-                    first_player.challenge_points = new_match.points_gained
+                    first_player.challenge_points += new_match.points_gained
                     first_player.points = second_player.points
             else:
                 if first_player.points > second_player.points:
                     new_match.points_gained = first_player.points - second_player.points
-                    second_player.challenge_points = new_match.points_gained
+                    second_player.challenge_points += new_match.points_gained
                     second_player.points = first_player.points
             yr = Year.query.filter_by(year=form_year).first()
             if len(yr.weeks) > 0:
@@ -799,9 +799,10 @@ def add_player():
     if form.validate_on_submit():
         name = form.name.data
         full_name = form.full_name.data
+        rank = form.rank.data
         with app.app_context():
             new_player = Player(name=name, full_name=full_name, points=0, challenge_points=0, challenge_matches=0)
-            if form.rank.data in range(1, 9):
+            if rank in range(1, 9):
                 new_player.rank = form.rank.data
             db.session.add(new_player)
             db.session.commit()
