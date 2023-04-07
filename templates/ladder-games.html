@@ -8,9 +8,6 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
-    <!-- Favicon -->
-    <link rel="icon" href="images/favicons/favicon.ico">
-
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/index.js') }}" charset="utf-8" defer></script>
 
@@ -170,7 +167,7 @@
           </div>
           <div class="" id="games" data-tab-info>
             {% for i in range(no_of_weeks) %}
-              <div class="week-card row justify-content-center container my-2 pb-5">
+              <div class="week-card row container my-2 pb-5">
                 <h4 class="white mt-3">Week {{ weeks[i].number }} ({{ weeks[i].first_saturday }})</h4>
                 {% for j in range(no_of_matches[i] - 1, -1, -1) %}
                   <div class="col-lg-3 col-md-6 my-2">
@@ -521,12 +518,12 @@
           <div class="" id="stats" data-tab-info>
             <div class="row">
               <div class="col-lg-4 col-md-6 my-2">
-                <div class="card text-center container">
+                <div class="card text-center container pb-4">
                   <h5 class="card-title fw-bold mt-3 mb-0">BEST POINTS PER GAME RATIO</h5>
                   <hr>
-                  <div class="card-body">
+                  <div class="card-body stats-card pb-0">
                     {% for player in ppg %}
-                      <div class="row">
+                      <div class="row stat">
                         <div class="col text-start">
                           <p>{{ player }}</p>
                         </div>
@@ -539,12 +536,12 @@
                 </div>
               </div>
               <div class="col-lg-4 col-md-6 my-2">
-                <div class="card text-center container">
+                <div class="card text-center container pb-4">
                   <h5 class="card-title fw-bold mt-3 mb-0">MOST POINTS IN A WEEK</h5>
                   <hr>
-                  <div class="card-body">
+                  <div class="card-body stats-card pb-0">
                     {% for player in mpw %}
-                      <div class="row">
+                      <div class="row stat">
                         <div class="col text-start">
                           <p>{{ player }}</p>
                         </div>
@@ -557,12 +554,12 @@
                 </div>
               </div>
               <div class="col-lg-4 col-md-6 my-2">
-                <div class="card text-center container">
+                <div class="card text-center container pb-4">
                   <h5 class="card-title fw-bold mt-3 mb-0">BEST LADDER GAMES WIN RATIO</h5>
                   <hr>
-                  <div class="card-body">
+                  <div class="card-body stats-card pb-0">
                     {% for player in wpct %}
-                      <div class="row">
+                      <div class="row stat">
                         <div class="col text-start">
                           <p>{{ player }}</p>
                         </div>

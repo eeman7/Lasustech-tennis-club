@@ -213,6 +213,25 @@ input[type=number] {
     visibility: hidden;
 }
 
+.stats-card {
+    overflow: auto !important;
+    height: 50%;
+}
+
+.stats-card::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.stats-card::-webkit-scrollbar-track {
+  display: none;
+}
+
+.stats-card::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+  border-radius: 10px;
+}
+
 .fixed {
     z-index: 999;
     position: fixed;

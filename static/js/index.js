@@ -26,3 +26,8 @@ for (let i = 0; i < 3; i++) {
         return false;
     })
 }
+
+setInterval(function(){
+    var stat_height = $(".stat").outerHeight();
+    $(".stats-card").innerHeight(stat_height * 5);
+}, 1000);

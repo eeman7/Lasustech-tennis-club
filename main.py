@@ -235,14 +235,7 @@ def get_ppg():
             ppg[player.name] = 0
     ppg_in_order = dict(sorted(ppg.items(), key=lambda x: x[1]))
     ppg_in_order = dict(reversed(list(ppg_in_order.items())))
-    top_5 = {}
-    n = 0
-    for p in ppg_in_order:
-        top_5[p] = ppg_in_order[p]
-        n += 1
-        if n >= 5:
-            break
-    return top_5
+    return ppg_in_order
 
 
 def get_wpct():
@@ -273,14 +266,7 @@ def get_wpct():
             wpct[player.name] = 0
     wpct_in_order = dict(sorted(wpct.items(), key=lambda x: x[1]))
     wpct_in_order = dict(reversed(list(wpct_in_order.items())))
-    top_5 = {}
-    n = 0
-    for p in wpct_in_order:
-        top_5[p] = wpct_in_order[p]
-        n += 1
-        if n >= 5:
-            break
-    return top_5
+    return wpct_in_order
 
 
 def del_match(match_id):
@@ -353,8 +339,6 @@ def ladder_games():
                 for player in weekly_points[week]:
                     if weekly_points[week][player] == i:
                         mpw[f"{player} ({week})"] = i
-            if len(mpw) >= 5:
-                break
 
         ppg = get_ppg()
         wpct = get_wpct()
