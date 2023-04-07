@@ -229,7 +229,10 @@ def get_ppg():
     players_in_order = Player.query.order_by(Player.points).all()[::-1]
     ppg = {}
     for player in players_in_order:
-        ppg[player.name] = round(float((player.points - player.challenge_points) / len(player.matches)), 2)
+        try:
+            ppg[player.name] = round(float((player.points - player.challenge_points) / len(player.matches)), 2)
+        except ZeroDivisionError:
+            ppg[player.name] = 0
     ppg_in_order = dict(sorted(ppg.items(), key=lambda x: x[1]))
     ppg_in_order = dict(reversed(list(ppg_in_order.items())))
     top_5 = {}
@@ -264,7 +267,10 @@ def get_wpct():
                     else:
                         if match.score1 < match.score2:
                             matches_won += 1
-        wpct[player.name] = round((matches_won / (len(player.matches) - player.challenge_matches)) * 100, 2)
+        try:
+            wpct[player.name] = round((matches_won / (len(player.matches) - player.challenge_matches)) * 100, 2)
+        except ZeroDivisionError:
+            wpct[player.name] = 0
     wpct_in_order = dict(sorted(wpct.items(), key=lambda x: x[1]))
     wpct_in_order = dict(reversed(list(wpct_in_order.items())))
     top_5 = {}
