@@ -214,22 +214,49 @@ input[type=number] {
 }
 
 .stats-card {
-    overflow: auto !important;
-    height: 50%;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 0.25rem !important;
 }
 
-.stats-card::-webkit-scrollbar {
+.not-top {
+    border-top: groove 5px !important;
+    border-color: lightgray;
+}
+
+div * {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  ::-webkit-scrollbar-track {
+    -webkit-box-shadow: none !important;
+    background-color: transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 0.2em;
+    background-color: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: transparent;
+  }
+}
+
+.on-scrollbar{
+  scrollbar-width: thin; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.on-scrollbar::-webkit-scrollbar {
   width: 0.2em;
 }
 
-.stats-card::-webkit-scrollbar-track {
+.on-scrollbar::-webkit-scrollbar-track {
   display: none;
 }
 
-.stats-card::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline: 1px solid slategrey;
-  border-radius: 10px;
+.on-scrollbar::-webkit-scrollbar-thumb {
+  background-color: grey;
+  outline: 1px solid grey;
+  border-radius: 15px;
 }
 
 .fixed {

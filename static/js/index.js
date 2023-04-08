@@ -31,3 +31,18 @@ setInterval(function(){
     var stat_height = $(".stat").outerHeight();
     $(".stats-card").innerHeight(stat_height * 5);
 }, 1000);
+
+handleScroll = (e) => {
+    if (e.target.classList.contains("on-scrollbar") === false) {
+        e.target.classList.add("on-scrollbar");
+        setInterval(function(){
+            e.target.classList.remove("on-scrollbar");
+        }, 4000);
+    }
+    if ($(e.target).scrollTop() != 0){
+        e.target.classList.add("not-top");
+    } else if (e.target.classList.contains("not-top") === true) {
+        e.target.classList.remove("not-top");
+    }
+}
+window.addEventListener('scroll', this.handleScroll, true);
