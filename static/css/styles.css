@@ -235,6 +235,7 @@ div * {
     width: 0.2em;
     background-color: transparent;
     visibility: hidden;
+    -webkit-appearance: none;
   }
   ::-webkit-scrollbar-thumb {
     background-color: transparent;
