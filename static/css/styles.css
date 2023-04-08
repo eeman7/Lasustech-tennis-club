@@ -234,10 +234,10 @@ div * {
     -webkit-appearance: none;
   }
   ::-webkit-scrollbar {
-    width: 0.2em;
     background-color: transparent;
     visibility: hidden;
     -webkit-appearance: none;
+    width: 0px;
   }
   ::-webkit-scrollbar-thumb {
     background-color: transparent;
