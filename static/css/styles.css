@@ -234,6 +234,7 @@ div * {
   ::-webkit-scrollbar {
     width: 0.2em;
     background-color: transparent;
+    visibility: hidden;
   }
   ::-webkit-scrollbar-thumb {
     background-color: transparent;
@@ -247,6 +248,7 @@ div * {
 
 .on-scrollbar::-webkit-scrollbar {
   width: 0.2em;
+  visibility: visible;
 }
 
 .on-scrollbar::-webkit-scrollbar-track {
