@@ -230,6 +230,8 @@ div * {
   ::-webkit-scrollbar-track {
     -webkit-box-shadow: none !important;
     background-color: transparent;
+    visibility: hidden;
+    -webkit-appearance: none;
   }
   ::-webkit-scrollbar {
     width: 0.2em;
@@ -239,6 +241,8 @@ div * {
   }
   ::-webkit-scrollbar-thumb {
     background-color: transparent;
+    visibility: hidden;
+    -webkit-appearance: none;
   }
 }
 
