@@ -358,6 +358,8 @@ div * {
   .exp-label {
     border-top-right-radius: 0.375rem !important;
     border-bottom-left-radius: 0 !important;
+    display: block;
+    width: 100%;
   }
 
   .exp-input {
