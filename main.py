@@ -119,7 +119,7 @@ class LadderGameForm(FlaskForm):
     player_4 = SelectField("Player 4", default=None)
     score_1 = IntegerField("Score", description="The score of the first team/player", validators=[DataRequired()])
     score_2 = IntegerField("Score", description="The score of the second team/player", validators=[DataRequired()])
-    week = IntegerField("Week", description="The week number of the current season that the match was played in",
+    week = IntegerField("Day", description="The day number of the current season that the match was played in",
                         validators=[DataRequired()])
     year = IntegerField("Year", default=datetime.datetime.now().year, validators=[DataRequired()])
     submit = SubmitField("Upload")
@@ -134,7 +134,7 @@ class ChallengeGameForm(FlaskForm):
     set2_score2 = IntegerField("Score", validators=[DataRequired()])
     set3_score1 = IntegerField("Score")
     set3_score2 = IntegerField("Score")
-    week = IntegerField("Week", description="The week number of the current season that the match was played in",
+    week = IntegerField("Day", description="The week number of the current season that the match was played in",
                         validators=[DataRequired()])
     year = IntegerField("Year", default=datetime.datetime.now().year, validators=[DataRequired()])
     submit = SubmitField("Upload")
@@ -209,18 +209,49 @@ def get_weekly_points():
                             if player.name == match_players[1]:
                                 player_points += match.points_gained
             all_player_points[player.name] = player_points
-        weekly_points[f"Wk {week.number}"] = all_player_points
+        weekly_points[f"Day {week.number}"] = all_player_points
+    return weekly_points
+
+
+def get_weekly_points_without_challenge():
+    weekly_points = {}
+    try:
+        weeks = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
+    except AttributeError:
+        weeks = []
+    for week in weeks:
+        all_player_points = {}
+        players = Player.query.all()
+        for player in players:
+            player_points = 0
+            player_matches = player.matches
+            for match in player_matches:
+                if match in week.matches:
+                    match_players = match.players_order.split()
+                    if not match.is_challenge:
+                        if len(match_players) == 4:
+                            if match_players[0] == player.name or match_players[1] == player.name:
+                                player_points += match.score1
+                            elif match_players[2] == player.name or match_players[3] == player.name:
+                                player_points += match.score2
+                        elif len(match_players) == 2:
+                            if match_players[0] == player.name:
+                                player_points += match.score1
+                            elif match_players[1] == player.name:
+                                player_points += match.score2
+            all_player_points[player.name] = player_points
+        weekly_points[f"Day {week.number}"] = all_player_points
     return weekly_points
 
 
 def get_cwp_with_players(weekly_points):
     players_in_order = Player.query.order_by(Player.points).all()[::-1]
-    cumulative_weekly_points_with_players = {"Wk 0": {player.name: 0 for player in players_in_order}}
+    cumulative_weekly_points_with_players = {"Day 0": {player.name: 0 for player in players_in_order}}
     for i in range(1, len(weekly_points) + 1):
-        cumulative_weekly_points_with_players[f"Wk {i}"] = {player.name: 0 for player in players_in_order}
+        cumulative_weekly_points_with_players[f"Day {i}"] = {player.name: 0 for player in players_in_order}
         for j in range(1, i + 1):
-            for k in range(len(cumulative_weekly_points_with_players[f"Wk {i}"])):
-                cumulative_weekly_points_with_players[f"Wk {i}"][players_in_order[k].name] += weekly_points[f"Wk {j}"][
+            for k in range(len(cumulative_weekly_points_with_players[f"Day {i}"])):
+                cumulative_weekly_points_with_players[f"Day {i}"][players_in_order[k].name] += weekly_points[f"Day {j}"][
                     players_in_order[k].name]
     return cumulative_weekly_points_with_players
 
@@ -333,11 +364,12 @@ def ladder_games():
         weekly_points = get_weekly_points()
         cumulative_weekly_points_with_players = get_cwp_with_players(weekly_points)
 
+        weekly_points_without_challenge = get_weekly_points_without_challenge()
         mpw = {}
         for i in range(25, 0, -1):
-            for week in weekly_points:
-                for player in weekly_points[week]:
-                    if weekly_points[week][player] == i:
+            for week in weekly_points_without_challenge:
+                for player in weekly_points_without_challenge[week]:
+                    if weekly_points_without_challenge[week][player] == i:
                         mpw[f"{player} ({week})"] = i
 
         ppg = get_ppg()
@@ -359,44 +391,44 @@ def ladder_games():
             if previous_week >= 0:
                 pwa = dict(
                     sorted(
-                        cumulative_weekly_points_with_players[f"Wk {previous_week}"].items(), key=lambda x: x[1]
+                        cumulative_weekly_points_with_players[f"Day {previous_week}"].items(), key=lambda x: x[1]
                     )
                 )
-                previous_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {previous_week}"][x] for x in pwa][::-1]
+                previous_week_arrangement = [cumulative_weekly_points_with_players[f"Day {previous_week}"][x] for x in pwa][::-1]
 
                 cwa = dict(
                     sorted(
-                        cumulative_weekly_points_with_players[f"Wk {current_week}"].items(), key=lambda x: x[1]
+                        cumulative_weekly_points_with_players[f"Day {current_week}"].items(), key=lambda x: x[1]
                     )
                 )
-                current_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {current_week}"][x] for x in cwa][
+                current_week_arrangement = [cumulative_weekly_points_with_players[f"Day {current_week}"][x] for x in cwa][
                                             ::-1]
             else:
                 pwa = dict(
                     sorted(
-                        cumulative_weekly_points_with_players[f"Wk 0"].items(), key=lambda x: x[1]
+                        cumulative_weekly_points_with_players[f"Day 0"].items(), key=lambda x: x[1]
                     )
                 )
-                previous_week_arrangement = [cumulative_weekly_points_with_players[f"Wk 0"][x] for x in
+                previous_week_arrangement = [cumulative_weekly_points_with_players[f"Day 0"][x] for x in
                                              pwa][::-1]
 
                 cwa = dict(
                     sorted(
-                        cumulative_weekly_points_with_players[f"Wk {current_week}"].items(), key=lambda x: x[1]
+                        cumulative_weekly_points_with_players[f"Day {current_week}"].items(), key=lambda x: x[1]
                     )
                 )
-                current_week_arrangement = [cumulative_weekly_points_with_players[f"Wk {current_week}"][x] for x in
+                current_week_arrangement = [cumulative_weekly_points_with_players[f"Day {current_week}"][x] for x in
                                             cwa][
                                            ::-1]
 
             for player in players:
                 if not player.position:
-                    player.position = current_week_arrangement.index(cumulative_weekly_points_with_players[f"Wk {current_week}"][player.name]) + 1
+                    player.position = current_week_arrangement.index(cumulative_weekly_points_with_players[f"Day {current_week}"][player.name]) + 1
                     player.shift = 0
                 else:
-                    player.position = current_week_arrangement.index(cumulative_weekly_points_with_players[f"Wk {current_week}"][player.name]) + 1
-                    player.shift = (previous_week_arrangement.index(cumulative_weekly_points_with_players[f"Wk {previous_week}"][player.name]) + 1) - player.position
-                player.points = cumulative_weekly_points_with_players[f"Wk {current_week}"][player.name]
+                    player.position = current_week_arrangement.index(cumulative_weekly_points_with_players[f"Day {current_week}"][player.name]) + 1
+                    player.shift = (previous_week_arrangement.index(cumulative_weekly_points_with_players[f"Day {previous_week}"][player.name]) + 1) - player.position
+                player.points = cumulative_weekly_points_with_players[f"Day {current_week}"][player.name]
             db.session.commit()
     try:
         players = Player.query.order_by(Player.points).all()[::-1]
@@ -525,16 +557,6 @@ def singles_ladder_match():
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
-                weekday = datetime.datetime.now().weekday()
-                if weekday != 5:
-                    if weekday > 5:
-                        new_week.first_saturday = (
-                                    datetime.datetime.now() - datetime.timedelta(days=weekday - 5)).strftime(
-                            "%d %B")
-                    else:
-                        new_week.first_saturday = (
-                                    datetime.datetime.now() - datetime.timedelta(days=weekday + 2)).strftime(
-                            "%d %B")
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
                 else:
@@ -613,14 +635,6 @@ def doubles_ladder_match():
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
-                weekday = datetime.datetime.now().weekday()
-                if weekday != 5:
-                    if weekday > 5:
-                        new_week.first_saturday = (datetime.datetime.now() - datetime.timedelta(days=weekday - 5)).strftime(
-                            "%d %B")
-                    else:
-                        new_week.first_saturday = (datetime.datetime.now() - datetime.timedelta(days=weekday + 2)).strftime(
-                            "%d %B")
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
                 else:
@@ -760,14 +774,6 @@ def challenge_match():
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
-                weekday = datetime.datetime.now().weekday()
-                if weekday != 5:
-                    if weekday > 5:
-                        new_week.first_saturday = (datetime.datetime.now() - datetime.timedelta(days=weekday - 5)).strftime(
-                            "%d %B")
-                    else:
-                        new_week.first_saturday = (datetime.datetime.now() - datetime.timedelta(days=weekday + 2)).strftime(
-                            "%d %B")
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
                 else:

@@ -328,4 +328,40 @@ div * {
   #games p {
     font-size: 0.8rem !important;
   }
+
+  .right-player {
+      border-top-right-radius: 0.375rem !important;
+      border-bottom-right-radius: 0.375rem !important;
+  }
+
+  .left-player {
+      border-top-left-radius: 0.375rem !important;
+      border-bottom-left-radius: 0.375rem !important;
+  }
+
+  .top-right-player {
+      border-top-right-radius: 0.375rem !important;
+  }
+
+  .top-left-player {
+      border-top-left-radius: 0.375rem !important;
+  }
+
+  .bottom-right-player {
+      border-bottom-right-radius: 0.375rem !important;
+  }
+
+  .bottom-left-player {
+      border-bottom-left-radius: 0.375rem !important;
+  }
+
+  .exp-label {
+    border-top-right-radius: 0.375rem !important;
+    border-bottom-left-radius: 0 !important;
+  }
+
+  .exp-input {
+    border-top-right-radius: 0 !important;
+    border-bottom-left-radius: 0.375rem !important;
+  }
 }
