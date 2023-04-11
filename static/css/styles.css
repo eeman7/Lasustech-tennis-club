@@ -218,7 +218,7 @@ input[type=number] {
     overflow-x: hidden !important;
     padding: 0 0.25rem !important;
     border-top: solid 5px !important;
-    border-color: white;
+    border-color: white !important;
 }
 
 .not-top {
@@ -249,6 +249,13 @@ div * {
   }
 }
 
+div:hover * {
+  ::-webkit-scrollbar {
+    overflow: auto !important;
+    display: block !important;
+  }
+}
+
 .on-scrollbar{
   scrollbar-width: thin; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
@@ -256,6 +263,7 @@ div * {
 
 .on-scrollbar::-webkit-scrollbar {
   overflow: auto !important;
+  display: block !important;
   width: 0.2em;
   visibility: visible;
 }
