@@ -217,6 +217,8 @@ input[type=number] {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding: 0 0.25rem !important;
+    border-top: solid 5px !important;
+    border-color: white;
 }
 
 .not-top {
@@ -253,6 +255,7 @@ div * {
 }
 
 .on-scrollbar::-webkit-scrollbar {
+  overflow: auto !important;
   width: 0.2em;
   visibility: visible;
 }
