@@ -237,6 +237,7 @@ div * {
     background-color: transparent;
     visibility: hidden;
     -webkit-appearance: none;
+    display: none !important;
     width: 0 !important;
   }
   ::-webkit-scrollbar-thumb {
