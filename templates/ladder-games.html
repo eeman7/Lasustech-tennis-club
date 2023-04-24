@@ -571,6 +571,26 @@
                   </div>
                 </div>
               </div>
+              <div class="col-lg-4 col-md-6 my-2">
+                <div class="card text-center container pb-4">
+                  <h5 class="card-title fw-bold mt-3 mb-0">MOST LADDER GAME BAGELS</h5>
+                  <hr>
+                  <div class="card-body stats-card">
+                    {% for player in mlgb %}
+                      {% if mlgb[player] != 0 %}
+                        <div class="row stat">
+                          <div class="col text-start">
+                            <p>{{ player }}</p>
+                          </div>
+                          <div class="col text-end">
+                            <p>{{ mlgb[player] }}</p>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

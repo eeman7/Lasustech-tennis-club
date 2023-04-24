@@ -300,6 +300,34 @@ def get_wpct():
     return wpct_in_order
 
 
+def get_mlgb():
+    mlgb = {}
+    players = Player.query.all()
+    for player in players:
+        n = 0
+        for match in player.matches:
+            if not match.is_challenge:
+                match_players = match.players_order.split()
+                if len(match_players) == 4:
+                    if player.name == match_players[0] or player.name == match_players[1]:
+                        if match.score1 == 5:
+                            n += 1
+                    else:
+                        if match.score2 == 5:
+                            n += 1
+                else:
+                    if player.name == match_players[0]:
+                        if match.score1 == 5:
+                            n += 1
+                    else:
+                        if match.score2 == 5:
+                            n += 1
+        mlgb[player.name] = n
+    mlgb_in_order = dict(sorted(mlgb.items(), key=lambda x: x[1]))
+    mlgb_in_order = dict(reversed(list(mlgb_in_order.items())))
+    return mlgb_in_order
+
+
 def del_match(match_id):
     with app.app_context():
         match = Match.query.get(match_id)
@@ -374,6 +402,7 @@ def ladder_games():
 
         ppg = get_ppg()
         wpct = get_wpct()
+        mlgb = get_mlgb()
 
         try:
             weeks_in_year = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
@@ -460,6 +489,7 @@ def ladder_games():
         mpw=mpw,
         ppg=ppg,
         wpct=wpct,
+        mlgb=mlgb,
         year=datetime.datetime.now().year
     )
 
