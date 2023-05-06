@@ -755,7 +755,7 @@ def singles_ladder_match():
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
                 if len(Week.query.all()) != 1:
-                    send_week_result(Week.query.all()[::-1].number)
+                    send_week_result(Week.query.all()[-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -835,7 +835,7 @@ def doubles_ladder_match():
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
                 if len(Week.query.all()) != 1:
-                    send_week_result(Week.query.all()[::-1].number)
+                    send_week_result(Week.query.all()[-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -976,7 +976,7 @@ def challenge_match():
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
                 if len(Week.query.all()) != 1:
-                    send_week_result(Week.query.all()[::-1].number)
+                    send_week_result(Week.query.all()[-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
