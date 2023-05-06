@@ -1,7 +1,13 @@
 import datetime
 import os
+import matplotlib.pyplot as plt
+import pandas as pd
 import random
+import smtplib
 from dotenv import load_dotenv
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 from flask import Flask, flash, render_template, url_for, redirect, request
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, current_user
@@ -34,6 +40,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 USERNAME = os.environ.get('LASUSTENNIS_USERNAME')
 PASSWORD = os.environ.get('LASUSTENNIS_PASSWORD')
+EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
 COLORS = ['#FFF200', '#F7FF00', '#E1FF00', '#CCFF00', '#B7FF00', '#A2FF00', '#8CFF00']
 
 
@@ -160,6 +167,161 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Log In')
 
 
+def send_member_request(name, phone_no, experience):
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = 'lasustennis@gmail.com'
+    smtp_password = EMAIL_PASSWORD
+
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+    server.login(smtp_username, smtp_password)
+
+    message = MIMEMultipart()
+    message['From'] = smtp_username
+    message['To'] = 'lasustennis@gmail.com'
+    message['Subject'] = 'New Member Request!!!'
+
+    body = f'{name} wants to become a member of LASUSTENNIS CLUB.\n' \
+           f'Phone Number: 0{phone_no}\nLevel of experience: {experience}'
+    message.attach(MIMEText(body, 'plain'))
+
+    server.sendmail(smtp_username, 'lasustennis@gmail.com', message.as_string())
+    server.quit()
+
+
+def send_stat(stat: dict, title: str):
+    plt.figure(figsize=(16, 10), facecolor=random.choice(COLORS))
+    plt.xticks(fontsize=15, rotation=15)
+    plt.yticks(fontsize=20)
+    plt.title(title, fontsize=25)
+    dic = {}
+    n = 0
+    for i in stat:
+        n = n + 1
+        if n == 5:
+            fifth = stat[i]
+    n = 0
+    for i in stat:
+        if n > 5:
+            if stat[i] == fifth:
+                dic[i] = stat[i]
+            else:
+                break
+        dic[i] = stat[i]
+        n = n + 1
+
+    for player in dic:
+        bar = plt.bar(player, height=dic[player], color='#000000')
+        plt.bar_label(bar, padding=3, fontsize=20)
+    plt.savefig('stat.png', dpi=1000)
+
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = 'lasustennis@gmail.com'
+    smtp_password = EMAIL_PASSWORD
+
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+    server.login(smtp_username, smtp_password)
+
+    message = MIMEMultipart()
+    message['From'] = smtp_username
+    message['To'] = 'lasustennis@gmail.com'
+    message['Subject'] = title
+
+    body = ''
+    message.attach(MIMEText(body, 'plain'))
+
+    with open('stat.png', 'rb') as f:
+        img_data = f.read()
+        image = MIMEImage(img_data, name=f'{title.lower().replace(" ", "_")}.png')
+        message.attach(image)
+
+    server.sendmail(smtp_username, 'lasustennis@gmail.com', message.as_string())
+    server.quit()
+
+
+def send_cwp():
+    weekly_points = get_weekly_points()
+    players_in_order = Player.query.order_by(Player.points).all()[::-1]
+    cumulative_weekly_points = {"": [0 for _ in players_in_order]}
+    for i in range(1, len(weekly_points) + 1):
+        cumulative_weekly_points[f"Day {i}"] = [0 for i in range(len(weekly_points[f"Day {i}"]))]
+        for j in range(1, i + 1):
+            for k in range(len(cumulative_weekly_points[f"Day {i}"])):
+                cumulative_weekly_points[f"Day {i}"][k] += weekly_points[f"Day {j}"][players_in_order[k].name]
+    df = pd.DataFrame.from_dict(
+        cumulative_weekly_points,
+        orient='index',
+        columns=[player.name for player in players_in_order]
+    )
+    plt.figure(figsize=(16, 10), facecolor=random.choice(COLORS))
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.xlabel('Weeks', fontsize=25)
+    plt.ylabel('Points', fontsize=25)
+    plt.plot(df.index, df, linewidth=3)
+    plt.xlim(left=0)
+    plt.ylim(bottom=0)
+    plt.legend(df.columns, fontsize=17)
+    plt.savefig('cwp.png', dpi=1000)
+
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = 'lasustennis@gmail.com'
+    smtp_password = EMAIL_PASSWORD
+
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+    server.login(smtp_username, smtp_password)
+
+    message = MIMEMultipart()
+    message['From'] = smtp_username
+    message['To'] = 'lasustennis@gmail.com'
+    message['Subject'] = 'CUMULATIVE WEEKLY POINTS'
+
+    with open('cwp.png', 'rb') as f:
+        img_data = f.read()
+        image = MIMEImage(img_data, name='cwp.png')
+        message.attach(image)
+
+    server.sendmail(smtp_username, 'lasustennis@gmail.com', message.as_string())
+    server.quit()
+
+
+def send_week_result(number):
+    week = Week.query.filter_by(number=number).first()
+    results = ""
+    for match in week.matches:
+        match_players = match.players_order.split()
+        if not match.is_challenge:
+            if len(match.players) == 4:
+                results = results + f"{match_players[0]}/{match_players[1]} {match.score1} - {match.score2} {match_players[2]}/{match_players[3]}\n\n"
+            elif len(match.players) == 2:
+                results = results + f"{match_players[0]} {match.score1} - {match.score2} {match_players[1]}\n\n"
+
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = 'lasustennis@gmail.com'
+    smtp_password = EMAIL_PASSWORD
+
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+    server.login(smtp_username, smtp_password)
+
+    message = MIMEMultipart()
+    message['From'] = smtp_username
+    message['To'] = 'lasustennis@gmail.com'
+    message['Subject'] = f'DAY {number} LADDER GAMES RESULTS'
+
+    body = results
+    message.attach(MIMEText(body, 'plain'))
+
+    server.sendmail(smtp_username, 'lasustennis@gmail.com', message.as_string())
+    server.quit()
+
+
 def get_weekly_points():
     weekly_points = {}
     try:
@@ -254,6 +416,17 @@ def get_cwp_with_players(weekly_points):
                 cumulative_weekly_points_with_players[f"Day {i}"][players_in_order[k].name] += weekly_points[f"Day {j}"][
                     players_in_order[k].name]
     return cumulative_weekly_points_with_players
+
+
+def get_mpw():
+    weekly_points_without_challenge = get_weekly_points_without_challenge()
+    mpw = {}
+    for i in range(40, 0, -1):
+        for week in weekly_points_without_challenge:
+            for player in weekly_points_without_challenge[week]:
+                if weekly_points_without_challenge[week][player] == i:
+                    mpw[f"{player} ({week})"] = i
+    return mpw
 
 
 def get_ppg():
@@ -381,6 +554,11 @@ def del_match(match_id):
 
 @app.route("/")
 def home():
+    # send_stat(get_mpw(), title='MOST POINTS IN A DAY')
+    # send_stat(get_ppg(), title='BEST POINTS PER GAME RATIO')
+    # send_stat(get_wpct(), title='BEST LADDER GAMES WIN RATIO')
+    # send_stat(get_mlgb(), title='MOST LADDER GAME BAGELS')
+    # send_cwp()
     return render_template("index.html")
 
 
@@ -392,14 +570,7 @@ def ladder_games():
         weekly_points = get_weekly_points()
         cumulative_weekly_points_with_players = get_cwp_with_players(weekly_points)
 
-        weekly_points_without_challenge = get_weekly_points_without_challenge()
-        mpw = {}
-        for i in range(25, 0, -1):
-            for week in weekly_points_without_challenge:
-                for player in weekly_points_without_challenge[week]:
-                    if weekly_points_without_challenge[week][player] == i:
-                        mpw[f"{player} ({week})"] = i
-
+        mpw = get_mpw()
         ppg = get_ppg()
         wpct = get_wpct()
         mlgb = get_mlgb()
@@ -501,11 +672,8 @@ def join():
         name = form.name.data
         phone_no = form.phone_no.data
         experience = form.experience.data
-        return redirect(
-            f"mailto:lasustennis@gmail.com?subject=New Member Request!!!&"
-            f"body={name} wants to become a member of LASUSTENNIS CLUB.\n"
-            f"Phone Number: 0{phone_no}\nLevel of experience: {experience}"
-        )
+        send_member_request(name, phone_no, experience)
+        return redirect(url_for('home'))
     return render_template("join.html", form=form)
 
 
@@ -586,6 +754,8 @@ def singles_ladder_match():
             if week in weeks_in_years:
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
+                if len(Week.query.all()) != 1:
+                    send_week_result(Week.query.all()[::-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -664,6 +834,8 @@ def doubles_ladder_match():
             if week in weeks_in_years:
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
+                if len(Week.query.all()) != 1:
+                    send_week_result(Week.query.all()[::-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -803,6 +975,8 @@ def challenge_match():
             if week in weeks_in_years:
                 new_match.week = Week.query.filter_by(number=week).first()
             else:
+                if len(Week.query.all()) != 1:
+                    send_week_result(Week.query.all()[::-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
