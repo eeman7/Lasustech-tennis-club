@@ -1304,7 +1304,7 @@ def get_games():
     form.week.choices = weeks
     if form.validate_on_submit():
         send_week_result(int(form.week.data))
-        flash("Check the official email once the admin home page shows up on your screen.")
+        flash("Check the official email for what you requested.")
         return redirect(url_for("admin"))
     return render_template('get-games.html', form=form)
 
@@ -1317,7 +1317,7 @@ def get_table():
     form.week.choices = weeks
     if form.validate_on_submit():
         send_table(int(form.week.data))
-        flash("Check the official email once the admin home page shows up on your screen.")
+        flash("Check the official email for what you requested.")
         return redirect(url_for("admin"))
     return render_template('get-table.html', form=form)
 

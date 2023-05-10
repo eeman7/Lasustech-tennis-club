@@ -1,6 +1,9 @@
 {% extends "match-form.html" %}
 
 {% block content %}
+    {% for mesg in get_flashed_messages() %}
+      <h1>{{ mesg }}</h1>
+    {% endfor %}
     <form method="POST" enctype="multipart/form-data" class="justify-content-center">
         {{ form.csrf_token }}
         <div class="row justify-content-center container">

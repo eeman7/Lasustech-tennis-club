@@ -29,6 +29,9 @@
 
   </head>
   <body>
+    {% for mesg in get_flashed_messages() %}
+      <h1>{{ mesg }}</h1>
+    {% endfor %}
     <div class="text-center">
       <nav class="stats-nav">
         <a class="link" href="/"><p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span></p></a>
