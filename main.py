@@ -344,7 +344,7 @@ def send_week_result(number):
             draw.rectangle(((100, 200 + (i * 50)), (700, 244 + (i * 50))), fill=(255, 255, 255))
             draw.rectangle(((362, 200 + (i * 50)), (438, 244 + (i * 50))), fill=(0, 0, 0))
 
-            score_font = ImageFont.truetype("arialbd.ttf", 24)
+            score_font = ImageFont.truetype("fonts/arialbd.ttf", 24)
             score = f"{match.score1} - {match.score2}"
             score_w, score_h = draw.textsize(score, font=score_font)
             score_x = 400 - score_w // 2
@@ -484,7 +484,7 @@ def send_table(day):
     for player in table:
         draw.rectangle(((100, 200 + (i * 50)), (800, 244 + (i * 50))), fill=(255, 255, 255))
 
-        numbers_font = ImageFont.truetype("arialbd.ttf", 24)
+        numbers_font = ImageFont.truetype("fonts/arialbd.ttf", 24)
         font = ImageFont.truetype("fonts/RadikalTrial-Medium-BF642254c12fd7b.otf", 24)
 
         pos = str(table[player]['position'])
