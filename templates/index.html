@@ -29,8 +29,11 @@
 
   </head>
   <body>
-    {% for mesg in get_flashed_messages() %}
-      <h1>{{ mesg }}</h1>
+    {% for message in get_flashed_messages() %}
+        <div class='alert alert-primary text-center alert-dismissible fade show mx-auto my-2 w-75' role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     {% endfor %}
     <div class="main">
       <nav class="navbar navbar-expand-lg navbar-dark align-middle">
