@@ -1,6 +1,7 @@
 import datetime
 import os
 import matplotlib.pyplot as plt
+import math
 import pandas as pd
 import random
 import smtplib
@@ -15,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from functools import wraps
 from math import ceil
+from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash
 from wtforms import StringField, SubmitField, IntegerField, SelectField, PasswordField
@@ -167,6 +169,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Log In')
 
 
+class WeekForm(FlaskForm):
+    week = SelectField("Select your desired day", default=None, validators=[DataRequired()])
+    submit = SubmitField('Proceed')
+
+
 def send_member_request(name, phone_no, experience):
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
@@ -301,6 +308,101 @@ def send_week_result(number):
             elif len(match.players) == 2:
                 results = results + f"{match_players[0]} {match.score1} - {match.score2} {match_players[1]}\n\n"
 
+    if len(week.matches) < 20:
+        img = Image.new('RGB', (800, 1200), (255, 255, 255))
+    else:
+        img = Image.new('RGB', (800 + (34 * (len(week.matches) - 19)), 1200 + (51 * (len(week.matches) - 19))), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    from_color = (69, 255, 0)
+    to_color = (255, 242, 0)
+    angle = math.pi * 0 / 180
+
+    for y in range(img.height):
+        for x in range(img.width):
+            frac = (math.cos(angle) * x + math.sin(angle) * y) / img.width
+            color = (
+                int(from_color[0] * (1 - frac) + to_color[0] * frac),
+                int(from_color[1] * (1 - frac) + to_color[1] * frac),
+                int(from_color[2] * (1 - frac) + to_color[2] * frac)
+            )
+            draw.point((x, y), fill=color)
+
+    # Heading
+    text = f"DAY {number} LADDER GAMES"
+    heading = ImageFont.truetype("fonts/RadikalTrial-Black-BF642254c139184.otf", 50)
+    text_width, text_height = draw.textsize(text, font=heading)
+    text_x = 400 - text_width // 2
+    text_y = 100 - text_height // 2
+    draw.text((text_x, text_y), text=text, fill=(0, 0, 0), font=heading)
+
+    # Matches
+    for i in range(len(week.matches)):
+        match = week.matches[i]
+        match_players = match.players_order.split()
+        if not match.is_challenge:
+            draw.rectangle(((100, 200 + (i * 50)), (700, 244 + (i * 50))), fill=(255, 255, 255))
+            draw.rectangle(((362, 200 + (i * 50)), (438, 244 + (i * 50))), fill=(0, 0, 0))
+
+            score_font = ImageFont.truetype("arialbd.ttf", 24)
+            score = f"{match.score1} - {match.score2}"
+            score_w, score_h = draw.textsize(score, font=score_font)
+            score_x = 400 - score_w // 2
+            score_y = (222 + (i * 50)) - score_h // 2
+            draw.text((score_x, score_y), text=score, fill=(255, 255, 255), font=score_font)
+
+            font = ImageFont.truetype("fonts/RadikalTrial-Medium-BF642254c12fd7b.otf", 24)
+            if len(match_players) == 4:
+                left = f'{match_players[0]}  {match_players[1]}'
+                right = f'{match_players[2]} {match_players[3]}'
+            else:
+                left = match_players[0]
+                right = match_players[1]
+
+            left_w, left_h = draw.textsize(left, font=font)
+            left_x = 350 - left_w
+            left_contains_bottom = 'g' in left or 'j' in left or 'p' in left or 'q' in left or 'y' in left
+            if left_contains_bottom:
+                left_y = (222 + (i * 50)) - left_h // 2
+            else:
+                left_y = (233 + (i * 50)) - left_h
+            draw.text((left_x, left_y), text=left, fill=(0, 0, 0), font=font)
+
+            right_h = draw.textsize(right, font=font)[1]
+            right_contains_bottom = 'g' in right or 'j' in right or 'p' in right or 'q' in right or 'y' in right
+            if right_contains_bottom:
+                right_y = (222 + (i * 50)) - right_h // 2
+            else:
+                right_y = (233 + (i * 50)) - right_h
+            draw.text((450, right_y), text=right, fill=(0, 0, 0), font=font)
+
+            if len(match_players) == 4:
+                slash = '/'
+                l_slash_w, l_slash_h = draw.textsize(slash, font=score_font)
+                size1 = draw.textsize(match_players[1], font=font)[0]
+                l_slash_x = 350 - (size1 + l_slash_w)
+                if left_contains_bottom:
+                    l_slash_y = (222 + (i * 50)) - l_slash_h // 2
+                else:
+                    l_slash_y = (233 + (i * 50)) - l_slash_h
+                draw.text((l_slash_x, l_slash_y), text=slash, fill=(0, 0, 0), font=score_font)
+
+                r_slash_h = draw.textsize(slash, font=score_font)[1]
+                size2 = draw.textsize(match_players[2], font=font)[0]
+                r_slash_x = 450 + size2
+                if right_contains_bottom:
+                    r_slash_y = (222 + (i * 50)) - r_slash_h // 2
+                else:
+                    r_slash_y = (233 + (i * 50)) - r_slash_h
+                draw.text((r_slash_x, r_slash_y), text=slash, fill=(0, 0, 0), font=score_font)
+
+            if match.score1 > match.score2:
+                draw.polygon(((100, 212 + (i * 50)), (110, 222 + (i * 50)), (100, 232 + (i * 50))), fill=(0, 0, 0), outline=(0, 0, 0))
+            else:
+                draw.polygon(((700, 212 + (i * 50)), (690, 222 + (i * 50)), (700, 232 + (i * 50))), fill=(0, 0, 0), outline=(0, 0, 0))
+
+    img.save('result.png')
+
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
     smtp_username = 'lasustennis@gmail.com'
@@ -313,10 +415,137 @@ def send_week_result(number):
     message = MIMEMultipart()
     message['From'] = smtp_username
     message['To'] = 'lasustennis@gmail.com'
-    message['Subject'] = f'DAY {number} LADDER GAMES RESULTS'
+    message['Subject'] = f'DAY {number} LADDER GAME RESULTS'
 
-    body = results
-    message.attach(MIMEText(body, 'plain'))
+    with open('result.png', 'rb') as f:
+        img_data = f.read()
+        image = MIMEImage(img_data, name=f'day{number}_ladder_games.png')
+        message.attach(image)
+
+    server.sendmail(smtp_username, 'lasustennis@gmail.com', message.as_string())
+    server.quit()
+
+
+def send_table(day):
+    points_by_week = dict(sorted(get_cwp_with_players(get_weekly_points())[f"Day {day}"].items(), key=lambda x: x[1], reverse=True))
+    only_points = [points_by_week[x] for x in points_by_week]
+    if not day == 1:
+        points_previous_week = get_cwp_with_players(get_weekly_points())[f"Day {day - 1}"]
+        only_previous_week_points = sorted([points_previous_week[x] for x in points_previous_week], reverse=True)
+    matches_by_week = get_cwm_with_players(get_weekly_matches())[f"Day {day}"]
+    table = {}
+    for player in points_by_week:
+        shift = only_previous_week_points.index(points_previous_week[player]) - only_points.index(points_by_week[player])
+        table[player] = {
+            "position": only_points.index(points_by_week[player]) + 1,
+            "games": matches_by_week[player],
+            "points": points_by_week[player],
+            "shift": shift
+        }
+
+    img = Image.new('RGB', (900, 1350), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    from_color = (0, 241, 255)
+    to_color = (214, 0, 255)
+    angle = math.pi * 15 / 180
+
+    for y in range(img.height):
+        for x in range(img.width):
+            frac = (math.cos(angle) * x + math.sin(angle) * y) / img.width
+            color = (
+                int(from_color[0] * (1 - frac) + to_color[0] * frac),
+                int(from_color[1] * (1 - frac) + to_color[1] * frac),
+                int(from_color[2] * (1 - frac) + to_color[2] * frac)
+            )
+            draw.point((x, y), fill=color)
+
+    # Heading
+    text = f"DAY {day} STANDINGS"
+    heading = ImageFont.truetype("fonts/RadikalTrial-Black-BF642254c139184.otf", 50)
+    text_width, text_height = draw.textsize(text, font=heading)
+    text_x = 450 - text_width // 2
+    text_y = 100 - text_height // 2
+    draw.text((text_x, text_y), text=text, fill=(0, 0, 0), font=heading)
+
+    heading = ImageFont.truetype("fonts/RadikalTrial-Black-BF642254c139184.otf", 30)
+    text_width, text_height = draw.textsize("Games", font=heading)
+    text_x = 640 - text_width // 2
+    text_y = 170 - text_height // 2
+    draw.text((text_x, text_y), text="Games", fill=(0, 0, 0), font=heading)
+
+    text_width, text_height = draw.textsize("Pts", font=heading)
+    text_x = 750 - text_width // 2
+    text_y = 170 - text_height // 2
+    draw.text((text_x, text_y), text="Pts", fill=(0, 0, 0), font=heading)
+
+    # Players
+    i = 0
+    for player in table:
+        draw.rectangle(((100, 200 + (i * 50)), (800, 244 + (i * 50))), fill=(255, 255, 255))
+
+        numbers_font = ImageFont.truetype("arialbd.ttf", 24)
+        font = ImageFont.truetype("fonts/RadikalTrial-Medium-BF642254c12fd7b.otf", 24)
+
+        pos = str(table[player]['position'])
+        pos_w, pos_h = draw.textsize(pos, font=numbers_font)
+        pos_x = 122 - pos_w // 2
+        pos_y = 222 + (i * 50) - pos_h // 2
+        draw.text((pos_x, pos_y), text=pos, fill=(0, 0, 0), font=numbers_font)
+
+        for y in range(200 + (i * 50), 245 + (i * 50)):
+            color = tuple(
+                int(img.getpixel((144, 197 + (i * 50)))[a] + ((255, 255, 255)[a] - img.getpixel((144, 197 + (i * 50)))[a]) * (y - (200 + (i * 50))) / ((244 + (i * 50)) - (200 + (i * 50)))) for a in range(3))
+            draw.line(((144, y), (147, y)), fill=color)
+
+        if table[player]['shift'] > 0:
+            draw.polygon(((168, 220 + (i * 50)), (180, 220 + (i * 50)), (174, 212 + (i * 50))), fill=(0, 255, 0), outline=(0, 255, 0))
+        else:
+            draw.polygon(((168, 220 + (i * 50)), (180, 220 + (i * 50)), (174, 212 + (i * 50))), fill=(200, 200, 200), outline=(200, 200, 200))
+
+        if table[player]['shift'] < 0:
+            draw.polygon(((168, 224 + (i * 50)), (180, 224 + (i * 50)), (174, 232 + (i * 50))), fill=(255, 0, 0), outline=(255, 0, 0))
+        else:
+            draw.polygon(((168, 224 + (i * 50)), (180, 224 + (i * 50)), (174, 232 + (i * 50))), fill=(200, 200, 200), outline=(200, 200, 200))
+
+        name_h = draw.textsize(player, font=font)[1]
+        name_y = 222 + (i * 50) - name_h // 2
+        draw.text((200, name_y), text=player, fill=(0, 0, 0), font=font)
+
+        text_width, text_height = draw.textsize(str(table[player]['games']), font=numbers_font)
+        text_x = 640 - text_width // 2
+        text_y = 222 + (i * 50) - text_height // 2
+        draw.text((text_x, text_y), text=str(table[player]['games']), fill=(0, 0, 0), font=numbers_font)
+
+        text_width, text_height = draw.textsize(str(table[player]['points']), font=numbers_font)
+        text_x = 750 - text_width // 2
+        text_y = 222 + (i * 50) - text_height // 2
+        draw.text((text_x, text_y), text=str(table[player]['points']), fill=(0, 0, 0), font=numbers_font)
+
+        i = i + 1
+
+    draw.rectangle(((100, 395), (800, 400)), fill=(3, 1, 61))
+    draw.rectangle(((100, 595), (800, 600)), fill=(3, 1, 61))
+    img.save('table.png')
+
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = 'lasustennis@gmail.com'
+    smtp_password = EMAIL_PASSWORD
+
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+    server.login(smtp_username, smtp_password)
+
+    message = MIMEMultipart()
+    message['From'] = smtp_username
+    message['To'] = 'lasustennis@gmail.com'
+    message['Subject'] = f'LADDER GAMES TABLE AS OF DAY {day}'
+
+    with open('table.png', 'rb') as f:
+        img_data = f.read()
+        image = MIMEImage(img_data, name=f'day{day}_table.png')
+        message.attach(image)
 
     server.sendmail(smtp_username, 'lasustennis@gmail.com', message.as_string())
     server.quit()
@@ -416,6 +645,37 @@ def get_cwp_with_players(weekly_points):
                 cumulative_weekly_points_with_players[f"Day {i}"][players_in_order[k].name] += weekly_points[f"Day {j}"][
                     players_in_order[k].name]
     return cumulative_weekly_points_with_players
+
+
+def get_weekly_matches():
+    weekly_matches = {}
+    try:
+        weeks = Year.query.filter_by(year=datetime.datetime.now().year).first().weeks
+    except AttributeError:
+        weeks = []
+    for week in weeks:
+        all_player_matches = {}
+        players = Player.query.all()
+        for player in players:
+            player_matches = 0
+            for match in player.matches:
+                if match in week.matches:
+                    player_matches = player_matches + 1
+            all_player_matches[player.name] = player_matches
+        weekly_matches[f"Day {week.number}"] = all_player_matches
+    return weekly_matches
+
+
+def get_cwm_with_players(weekly_matches):
+    players = Player.query.all()
+    cumulative_weekly_matches_with_players = {"Day 0": {player.name: 0 for player in players}}
+    for i in range(1, len(weekly_matches) + 1):
+        cumulative_weekly_matches_with_players[f"Day {i}"] = {player.name: 0 for player in players}
+        for j in range(1, i + 1):
+            for k in range(len(cumulative_weekly_matches_with_players[f"Day {i}"])):
+                cumulative_weekly_matches_with_players[f"Day {i}"][players[k].name] += weekly_matches[f"Day {j}"][
+                    players[k].name]
+    return cumulative_weekly_matches_with_players
 
 
 def get_mpw():
@@ -756,6 +1016,7 @@ def singles_ladder_match():
             else:
                 if len(Week.query.all()) != 1:
                     send_week_result(Week.query.all()[-1].number)
+                    send_table(Week.query.all()[-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -836,6 +1097,7 @@ def doubles_ladder_match():
             else:
                 if len(Week.query.all()) != 1:
                     send_week_result(Week.query.all()[-1].number)
+                    send_table(Week.query.all()[-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -977,6 +1239,7 @@ def challenge_match():
             else:
                 if len(Week.query.all()) != 1:
                     send_week_result(Week.query.all()[-1].number)
+                    send_table(Week.query.all()[-1].number)
                 new_week = Week(number=week, first_saturday=datetime.datetime.now().strftime("%d %B"))
                 if form_year in [y.year for y in Year.query.all()]:
                     new_week.year = Year.query.filter_by(year=form_year).first()
@@ -1031,6 +1294,30 @@ def delete_match(match_id):
     match = Match.query.get(match_id)
     del_match(match.id)
     return redirect(url_for("admin"))
+
+
+@app.route("/get-games", methods=['GET', 'POST'])
+@admin_only
+def get_games():
+    weeks = [" "] + [week.number for week in Week.query.all()]
+    form = WeekForm(week=weeks[-1])
+    form.week.choices = weeks
+    if form.validate_on_submit():
+        send_week_result(int(form.week.data))
+        return redirect(url_for("admin"))
+    return render_template('get-games.html', form=form)
+
+
+@app.route("/get-table", methods=['GET', 'POST'])
+@admin_only
+def get_table():
+    weeks = [" "] + [week.number for week in Week.query.all()]
+    form = WeekForm(week=weeks[-1])
+    form.week.choices = weeks
+    if form.validate_on_submit():
+        send_table(int(form.week.data))
+        return redirect(url_for("admin"))
+    return render_template('get-table.html', form=form)
 
 
 if __name__ == "__main__":
