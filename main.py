@@ -933,6 +933,7 @@ def join():
         phone_no = form.phone_no.data
         experience = form.experience.data
         send_member_request(name, phone_no, experience)
+        flash("Your details have been sent to board! You will be gotten back to.")
         return redirect(url_for('home'))
     return render_template("join.html", form=form)
 
