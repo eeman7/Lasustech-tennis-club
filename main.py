@@ -791,21 +791,6 @@ def del_match(match_id):
             else:
                 player2.challenge_points -= match.points_gained
                 player2.points -= match.points_gained
-        else:
-            if len(match_players) == 4:
-                player4 = Player.query.filter_by(name=match_players[-1]).first()
-                player4.points = player4.points - match.score2
-                player3 = Player.query.filter_by(name=match_players[-1]).first()
-                player3.points = player3.points - match.score2
-                player2 = Player.query.filter_by(name=match_players[-1]).first()
-                player2.points = player2.points - match.score1
-                player1 = Player.query.filter_by(name=match_players[-1]).first()
-                player1.points = player1.points - match.score1
-            elif len(match_players) == 2:
-                player2 = Player.query.filter_by(name=match_players[-1]).first()
-                player2.points = player2.points - match.score2
-                player1 = Player.query.filter_by(name=match_players[-1]).first()
-                player1.points = player1.points - match.score1
         for player in match.players:
             match.players.remove(player)
         db.session.delete(match)
@@ -933,7 +918,7 @@ def join():
         phone_no = form.phone_no.data
         experience = form.experience.data
         send_member_request(name, phone_no, experience)
-        flash("Your details have been sent to board! You will be gotten back to.")
+        flash("Your details have been sent to the board! You will be gotten back to.")
         return redirect(url_for('home'))
     return render_template("join.html", form=form)
 
@@ -1261,7 +1246,7 @@ def challenge_match():
 def add_player():
     form = AddPlayerForm()
     if form.validate_on_submit():
-        name = form.name.data
+        name = form.name.data.strip()
         full_name = form.full_name.data
         rank = form.rank.data
         with app.app_context():
