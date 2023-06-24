@@ -313,6 +313,7 @@ def send_week_result(number):
     else:
         img = Image.new('RGB', (800 + (34 * (len(week.matches) - 19)), 1200 + (51 * (len(week.matches) - 19))), (255, 255, 255))
     draw = ImageDraw.Draw(img)
+    w, h = img.size
 
     from_color = (69, 255, 0)
     to_color = (255, 242, 0)
@@ -332,7 +333,7 @@ def send_week_result(number):
     text = f"DAY {number} LADDER GAMES"
     heading = ImageFont.truetype("fonts/RadikalTrial-Black-BF642254c139184.otf", 50)
     text_width, text_height = draw.textsize(text, font=heading)
-    text_x = 400 - text_width // 2
+    text_x = (w // 2) - text_width // 2
     text_y = 100 - text_height // 2
     draw.text((text_x, text_y), text=text, fill=(0, 0, 0), font=heading)
 
@@ -341,13 +342,13 @@ def send_week_result(number):
         match = week.matches[i]
         match_players = match.players_order.split()
         if not match.is_challenge:
-            draw.rectangle(((100, 200 + (i * 50)), (700, 244 + (i * 50))), fill=(255, 255, 255))
-            draw.rectangle(((362, 200 + (i * 50)), (438, 244 + (i * 50))), fill=(0, 0, 0))
+            draw.rectangle((((w // 8), 200 + (i * 50)), ((w - (w // 8)), 244 + (i * 50))), fill=(255, 255, 255))
+            draw.rectangle(((((w // 2) - 38), 200 + (i * 50)), (((w // 2) + 38), 244 + (i * 50))), fill=(0, 0, 0))
 
             score_font = ImageFont.truetype("fonts/arialbd.ttf", 24)
             score = f"{match.score1} - {match.score2}"
             score_w, score_h = draw.textsize(score, font=score_font)
-            score_x = 400 - score_w // 2
+            score_x = (w // 2) - score_w // 2
             score_y = (222 + (i * 50)) - score_h // 2
             draw.text((score_x, score_y), text=score, fill=(255, 255, 255), font=score_font)
 
@@ -360,7 +361,7 @@ def send_week_result(number):
                 right = match_players[1]
 
             left_w, left_h = draw.textsize(left, font=font)
-            left_x = 350 - left_w
+            left_x = ((w // 2) - 50) - left_w
             left_contains_bottom = 'g' in left or 'j' in left or 'p' in left or 'q' in left or 'y' in left
             if left_contains_bottom:
                 left_y = (222 + (i * 50)) - left_h // 2
@@ -374,13 +375,13 @@ def send_week_result(number):
                 right_y = (222 + (i * 50)) - right_h // 2
             else:
                 right_y = (233 + (i * 50)) - right_h
-            draw.text((450, right_y), text=right, fill=(0, 0, 0), font=font)
+            draw.text((((w // 2) + 50), right_y), text=right, fill=(0, 0, 0), font=font)
 
             if len(match_players) == 4:
                 slash = '/'
                 l_slash_w, l_slash_h = draw.textsize(slash, font=score_font)
                 size1 = draw.textsize(match_players[1], font=font)[0]
-                l_slash_x = 350 - (size1 + l_slash_w)
+                l_slash_x = ((w // 2) - 50) - (size1 + l_slash_w)
                 if left_contains_bottom:
                     l_slash_y = (222 + (i * 50)) - l_slash_h // 2
                 else:
@@ -389,7 +390,7 @@ def send_week_result(number):
 
                 r_slash_h = draw.textsize(slash, font=score_font)[1]
                 size2 = draw.textsize(match_players[2], font=font)[0]
-                r_slash_x = 450 + size2
+                r_slash_x = ((w // 2) + 50) + size2
                 if right_contains_bottom:
                     r_slash_y = (222 + (i * 50)) - r_slash_h // 2
                 else:
@@ -397,9 +398,9 @@ def send_week_result(number):
                 draw.text((r_slash_x, r_slash_y), text=slash, fill=(0, 0, 0), font=score_font)
 
             if match.score1 > match.score2:
-                draw.polygon(((100, 212 + (i * 50)), (110, 222 + (i * 50)), (100, 232 + (i * 50))), fill=(0, 0, 0), outline=(0, 0, 0))
+                draw.polygon((((w // 8), 212 + (i * 50)), (((w // 8) + 10), 222 + (i * 50)), ((w // 8), 232 + (i * 50))), fill=(0, 0, 0), outline=(0, 0, 0))
             else:
-                draw.polygon(((700, 212 + (i * 50)), (690, 222 + (i * 50)), (700, 232 + (i * 50))), fill=(0, 0, 0), outline=(0, 0, 0))
+                draw.polygon((((w - (w // 8)), 212 + (i * 50)), ((w - (w // 8) - 10), 222 + (i * 50)), ((w - (w // 8)), 232 + (i * 50))), fill=(0, 0, 0), outline=(0, 0, 0))
 
     img.save('result.png')
 
@@ -443,8 +444,12 @@ def send_table(day):
             "shift": shift
         }
 
-    img = Image.new('RGB', (900, 1350), (255, 255, 255))
+    if len(table) < 20:
+        img = Image.new('RGB', (900, 1350), (255, 255, 255))
+    else:
+        img = Image.new('RGB', (900 + ((len(table) - 20) * 34), 1350 + ((len(table) - 20) * 51)), (255, 255, 255))
     draw = ImageDraw.Draw(img)
+    w, h = img.size
 
     from_color = (0, 241, 255)
     to_color = (214, 0, 255)
@@ -464,68 +469,69 @@ def send_table(day):
     text = f"DAY {day} STANDINGS"
     heading = ImageFont.truetype("fonts/RadikalTrial-Black-BF642254c139184.otf", 50)
     text_width, text_height = draw.textsize(text, font=heading)
-    text_x = 450 - text_width // 2
+    text_x = (w // 2) - text_width // 2
     text_y = 100 - text_height // 2
     draw.text((text_x, text_y), text=text, fill=(0, 0, 0), font=heading)
 
     heading = ImageFont.truetype("fonts/RadikalTrial-Black-BF642254c139184.otf", 30)
     text_width, text_height = draw.textsize("Games", font=heading)
-    text_x = 640 - text_width // 2
+    text_x = ((w - (w // 9)) - 160) - text_width // 2
     text_y = 170 - text_height // 2
     draw.text((text_x, text_y), text="Games", fill=(0, 0, 0), font=heading)
 
     text_width, text_height = draw.textsize("Pts", font=heading)
-    text_x = 750 - text_width // 2
+    text_x = ((w - (w // 9)) - 50) - text_width // 2
     text_y = 170 - text_height // 2
     draw.text((text_x, text_y), text="Pts", fill=(0, 0, 0), font=heading)
 
     # Players
     i = 0
     for player in table:
-        draw.rectangle(((100, 200 + (i * 50)), (800, 244 + (i * 50))), fill=(255, 255, 255))
+        draw.rectangle((((w // 9), 200 + (i * 50)), ((w - (w // 9)), 244 + (i * 50))), fill=(255, 255, 255))
 
         numbers_font = ImageFont.truetype("fonts/arialbd.ttf", 24)
         font = ImageFont.truetype("fonts/RadikalTrial-Medium-BF642254c12fd7b.otf", 24)
 
         pos = str(table[player]['position'])
         pos_w, pos_h = draw.textsize(pos, font=numbers_font)
-        pos_x = 122 - pos_w // 2
+        pos_x = ((w // 9) + 22) - pos_w // 2
         pos_y = 222 + (i * 50) - pos_h // 2
         draw.text((pos_x, pos_y), text=pos, fill=(0, 0, 0), font=numbers_font)
 
         for y in range(200 + (i * 50), 245 + (i * 50)):
             color = tuple(
-                int(img.getpixel((144, 197 + (i * 50)))[a] + ((255, 255, 255)[a] - img.getpixel((144, 197 + (i * 50)))[a]) * (y - (200 + (i * 50))) / ((244 + (i * 50)) - (200 + (i * 50)))) for a in range(3))
-            draw.line(((144, y), (147, y)), fill=color)
+                int(img.getpixel((((w // 9) + 44), 197 + (i * 50)))[a] + ((255, 255, 255)[a] - img.getpixel((((w // 9) + 44), 197 + (i * 50)))[a]) * (y - (200 + (i * 50))) / ((244 + (i * 50)) - (200 + (i * 50)))) for a in range(3)
+            )
+            draw.line(((((w // 9) + 44), y), (((w // 9) + 47), y)), fill=color)
 
         if table[player]['shift'] > 0:
-            draw.polygon(((168, 220 + (i * 50)), (180, 220 + (i * 50)), (174, 212 + (i * 50))), fill=(0, 255, 0), outline=(0, 255, 0))
+            draw.polygon(((((w // 9) + 68), 220 + (i * 50)), (((w // 9) + 80), 220 + (i * 50)), (((w // 9) + 74), 212 + (i * 50))), fill=(0, 255, 0), outline=(0, 255, 0))
         else:
-            draw.polygon(((168, 220 + (i * 50)), (180, 220 + (i * 50)), (174, 212 + (i * 50))), fill=(200, 200, 200), outline=(200, 200, 200))
+            draw.polygon(((((w // 9) + 68), 220 + (i * 50)), (((w // 9) + 80), 220 + (i * 50)), (((w // 9) + 74), 212 + (i * 50))), fill=(200, 200, 200), outline=(200, 200, 200))
 
         if table[player]['shift'] < 0:
-            draw.polygon(((168, 224 + (i * 50)), (180, 224 + (i * 50)), (174, 232 + (i * 50))), fill=(255, 0, 0), outline=(255, 0, 0))
+            draw.polygon(((((w // 9) + 68), 224 + (i * 50)), (((w // 9) + 80), 224 + (i * 50)), (((w // 9) + 74), 232 + (i * 50))), fill=(255, 0, 0), outline=(255, 0, 0))
         else:
-            draw.polygon(((168, 224 + (i * 50)), (180, 224 + (i * 50)), (174, 232 + (i * 50))), fill=(200, 200, 200), outline=(200, 200, 200))
+            draw.polygon(((((w // 9) + 68), 224 + (i * 50)), (((w // 9) + 80), 224 + (i * 50)), (((w // 9) + 74), 232 + (i * 50))), fill=(200, 200, 200), outline=(200, 200, 200))
 
         name_h = draw.textsize(player, font=font)[1]
         name_y = 222 + (i * 50) - name_h // 2
-        draw.text((200, name_y), text=player, fill=(0, 0, 0), font=font)
+        draw.text((((w // 9) + 100), name_y), text=player, fill=(0, 0, 0), font=font)
 
         text_width, text_height = draw.textsize(str(table[player]['games']), font=numbers_font)
-        text_x = 640 - text_width // 2
+        text_x = ((w - (w // 9)) - 160) - text_width // 2
         text_y = 222 + (i * 50) - text_height // 2
         draw.text((text_x, text_y), text=str(table[player]['games']), fill=(0, 0, 0), font=numbers_font)
 
         text_width, text_height = draw.textsize(str(table[player]['points']), font=numbers_font)
-        text_x = 750 - text_width // 2
+        text_x = ((w - (w // 9)) - 50) - text_width // 2
         text_y = 222 + (i * 50) - text_height // 2
         draw.text((text_x, text_y), text=str(table[player]['points']), fill=(0, 0, 0), font=numbers_font)
 
         i = i + 1
 
-    draw.rectangle(((100, 395), (800, 400)), fill=(3, 1, 61))
-    draw.rectangle(((100, 595), (800, 600)), fill=(3, 1, 61))
+    draw.rectangle((((w // 9), 395), ((w - (w // 9)), 400)), fill=(3, 1, 61))
+    draw.rectangle((((w // 9), 595), ((w - (w // 9)), 600)), fill=(3, 1, 61))
     img.save('table.png')
 
     smtp_server = 'smtp.gmail.com'
