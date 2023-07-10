@@ -1,6 +1,6 @@
 $(".tab").click(function () {
   var tabs = $(this).parent().parent().children();
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     tab = $(tabs[i]).children();
     if ($(tab).hasClass("active")){
       $(tab).removeClass("active");
@@ -16,10 +16,10 @@ $(".tab").click(function () {
 var tabs = $('[data-tab-value]');
 var tabInfos = $('[data-tab-info]');
 
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < 4; i++) {
     $(tabs[i]).click(function () {
         var target = $(tabs[i].dataset.tabValue);
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 4; i++) {
             $(tabInfos[i]).removeClass('active')
         }
         target.addClass('active');
@@ -46,3 +46,11 @@ handleScroll = (e) => {
     }
 }
 window.addEventListener('scroll', this.handleScroll, true);
+
+//Head to head
+$('.stat-toggle').click(function(){
+    var inputValue = $(this).attr("id");
+    var targetBox = $("." + inputValue);
+    $(".h2h-div").not(targetBox).addClass("hide");
+    $(targetBox).removeClass("hide");
+});

@@ -171,7 +171,12 @@ class LoginForm(FlaskForm):
 
 class WeekForm(FlaskForm):
     week = SelectField("Select your desired day", default=None, validators=[DataRequired()])
-    submit = SubmitField('Proceed')
+    submit = SubmitField('Go')
+
+
+class HeadToHeadForm(FlaskForm):
+    player_1 = SelectField("Player 1", default=None, validators=[DataRequired()])
+    player_2 = SelectField("Player 2", default=None, validators=[DataRequired()])
 
 
 def send_member_request(name, phone_no, experience):
@@ -813,8 +818,15 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/ladder-games")
+@app.route("/ladder-games", methods=['GET', 'POST'])
 def ladder_games():
+    form = HeadToHeadForm()
+    with app.app_context():
+        player_names = sorted([""] + [player.name for player in Player.query.all()])
+    form.player_1.choices = player_names
+    form.player_2.choices = player_names
+    if request.method == 'POST':
+        return redirect(url_for('h2h', p1=form.player_1.data, p2=form.player_2.data))
     with app.app_context():
         players = Player.query.all()
 
@@ -912,8 +924,82 @@ def ladder_games():
         ppg=ppg,
         wpct=wpct,
         mlgb=mlgb,
-        year=datetime.datetime.now().year
+        year=datetime.datetime.now().year,
+        form=form
     )
+
+
+@app.route("/head-to-head", methods=['GET', 'POST'])
+def h2h():
+    player1 = request.args.get('p1')
+    player2 = request.args.get('p2')
+    form = HeadToHeadForm(player_1=player1, player_2=player2)
+    all_matches = Match.query.filter(Match.players_order.contains(player1), Match.players_order.contains(player2))
+    matches_all = {
+        "singles": {
+            "matches": [],
+            "played": 0,
+            "player1": 0,
+            "player2": 0
+        },
+        "doubles": {
+            "matches": [],
+            "played": 0,
+            "player1": 0,
+            "player2": 0
+        },
+        "teammates": {
+            "matches": [],
+            "played": 0,
+            "won": 0,
+        }
+    }
+    for match in all_matches:
+        players = match.players_order.split()
+        if len(players) == 2:
+            matches_all["singles"]["matches"].append(match)
+            if match.score1 > match.score2:
+                if player1 == players[0]:
+                    matches_all["singles"]["player1"] += 1
+                else:
+                    matches_all["singles"]["player2"] += 1
+            else:
+                if player1 == players[1]:
+                    matches_all["singles"]["player1"] += 1
+                else:
+                    matches_all["singles"]["player2"] += 1
+        else:
+            if sorted([player1, player2]) == sorted(players[0:2]):
+                matches_all["teammates"]["matches"].append(match)
+                if match.score1 > match.score2:
+                    matches_all["teammates"]["won"] += 1
+            elif sorted([player1, player2]) == sorted(players[2:]):
+                matches_all["teammates"]["matches"].append(match)
+                matches_all["teammates"]["played"] += 1
+                if match.score1 < match.score2:
+                    matches_all["teammates"]["won"] += 1
+            else:
+                matches_all["doubles"]["matches"].append(match)
+                if player1 in players[0:2]:
+                    if match.score1 > match.score2:
+                        matches_all["doubles"]["player1"] += 1
+                    else:
+                        matches_all["doubles"]["player2"] += 1
+                else:
+                    if match.score1 < match.score2:
+                        matches_all["doubles"]["player1"] += 1
+                    else:
+                        matches_all["doubles"]["player2"] += 1
+    matches_all["singles"]["played"] = len(matches_all["singles"]["matches"])
+    matches_all["doubles"]["played"] = len(matches_all["doubles"]["matches"])
+    matches_all["teammates"]["played"] = len(matches_all["teammates"]["matches"])
+    with app.app_context():
+        player_names = sorted([""] + [player.name for player in Player.query.all()])
+    form.player_1.choices = player_names
+    form.player_2.choices = player_names
+    if request.method == 'POST':
+        return redirect(url_for('h2h', p1=form.player_1.data, p2=form.player_2.data))
+    return render_template('head2head.html', form=form, h2h=matches_all, year=datetime.datetime.now().year)
 
 
 @app.route("/join", methods=['GET', 'POST'])
@@ -1314,5 +1400,10 @@ def get_table():
     return render_template('get-table.html', form=form)
 
 
+def split(string: str):
+    return string.split()
+
+
 if __name__ == "__main__":
+    app.jinja_env.globals.update(split=split)
     app.run(debug=True)

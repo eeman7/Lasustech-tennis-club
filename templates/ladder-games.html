@@ -37,6 +37,7 @@
               <li class="nav-item"><a href="" class="nav-link tab active" aria-current="page" data-tab-value="#standings">Standings</a></li>
               <li class="nav-item"><a href="" class="nav-link tab" data-tab-value="#games">Games</a></li>
               <li class="nav-item"><a href="" class="nav-link tab" data-tab-value="#stats">Stats</a></li>
+              <li class="nav-item"><a href="" class="nav-link tab" data-tab-value="#h2h">Head to Head</a></li>
             </ul>
           </header>
         </div>
@@ -537,24 +538,6 @@
               </div>
               <div class="col-lg-4 col-md-6 my-2">
                 <div class="card text-center container pb-4">
-                  <h5 class="card-title fw-bold mt-3 mb-0">MOST POINTS IN A DAY</h5>
-                  <hr>
-                  <div class="card-body stats-card">
-                    {% for player in mpw %}
-                      <div class="row stat">
-                        <div class="col-8 text-start">
-                          <p>{{ player }}</p>
-                        </div>
-                        <div class="col text-end">
-                          <p>{{ mpw[player] }}</p>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 col-md-6 my-2">
-                <div class="card text-center container pb-4">
                   <h5 class="card-title fw-bold mt-3 mb-0">BEST LADDER GAMES WIN RATIO</h5>
                   <hr>
                   <div class="card-body stats-card">
@@ -590,6 +573,37 @@
                     {% endfor %}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+          <div class="" id="h2h" data-tab-info>
+            <div class="row justify-content-center container">
+              <div class="col-lg-6 card p-2">
+                <h5 class="card-title fw-bold mb-0">PLAYERS HEAD-TO-HEAD</h5>
+                <hr>
+                <form method="POST" enctype="multipart/form-data" class="justify-content-center d-block">
+                  {{ form.csrf_token }}
+                  <div class="row justify-content-center w-100 m-0">
+                    <div class="col-5 px-2">
+                      <div class="input-group mb-3">
+                        {{ form.player_1.label(class_="input-group-text remove") }} {{ form.player_1(class_="form-control text-end left-player") }}
+                      </div>
+                    </div>
+                    <div class="col-1 p-0 vertically-align">
+                      <h6 class="versus">VS</h6>
+                    </div>
+                    <div class="col-5 px-2">
+                      <div class="input-group mb-3">
+                        {{ form.player_2(class_="form-control right-player") }} {{ form.player_2.label(class_="input-group-text remove") }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row justify-content-center">
+                    <div class="col">
+                      <button class="btn btn-dark" id="submit" name="submit" type="submit"><i class="fa-solid fa-rocket"></i></button>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

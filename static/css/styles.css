@@ -268,6 +268,10 @@ div:hover * {
   visibility: visible;
 }
 
+.hide {
+    display: none;
+}
+
 .on-scrollbar::-webkit-scrollbar-track {
   display: none;
 }
