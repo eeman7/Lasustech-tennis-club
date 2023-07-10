@@ -35,6 +35,12 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
+def split(string: str):
+    return string.split()
+
+
+app.jinja_env.globals.update(split=split)
+
 # CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -1400,10 +1406,5 @@ def get_table():
     return render_template('get-table.html', form=form)
 
 
-def split(string: str):
-    return string.split()
-
-
 if __name__ == "__main__":
-    app.jinja_env.globals.update(split=split)
     app.run(debug=True)
