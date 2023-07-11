@@ -26,248 +26,252 @@
 
   </head>
   <body>
-    <div class="stats-div">
-      <div class="fixed">
-        <nav class="stats-nav">
-          <a class="link" href="/"><p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span><span class="ladder-games"> Ladder Games 2023</span></p></a>
-        </nav>
-      </div>
-      <div class="invisible">
-        <nav class="stats-nav">
-          <a class="link" href="/"><p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span><span class="ladder-games"> Ladder Games 2023</span></p></a>
-        </nav>
-      </div>
-      <div class="container mt-3 mb-5">
-        <form method="POST" enctype="multipart/form-data" class="justify-content-center">
-          <div class="row justify-content-center container">
-            <div class="col-lg-6 card p-2 mb-5">
-              <h5 class="card-title fw-bold mb-0">PLAYERS HEAD-TO-HEAD</h5>
-              <hr>
-              {{ form.csrf_token }}
-              <div class="row justify-content-center w-100 m-0">
-                  <div class="col-5 px-2">
-                      <div class="input-group mb-3">
-                          {{ form.player_1.label(class_="input-group-text remove") }} {{ form.player_1(class_="form-control text-end left-player") }}
-                      </div>
-                  </div>
-                  <div class="col-1 p-0 vertically-align">
-                      <h6 class="versus">VS</h6>
-                  </div>
-                  <div class="col-5 px-2">
-                      <div class="input-group mb-3">
-                          {{ form.player_2(class_="form-control right-player") }} {{ form.player_2.label(class_="input-group-text remove") }}
-                      </div>
-                  </div>
-              </div>
-              <div class="row py-2">
-                <div class="checkbox-inline col-4">
-                  <input class="form-check-input stat-toggle" type="radio" name="stat" id="singles" checked="checked">
-                  <label class="form-check-label" for="singles">
-                    Singles
-                  </label>
+    <div class="stat-div">
+      <div class="other-content">
+        <div class="fixed">
+          <nav class="stats-nav">
+            <a class="link" href="/"><p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span><span class="ladder-games"> Ladder Games 2023</span></p></a>
+          </nav>
+        </div>
+        <div class="invisible">
+          <nav class="stats-nav">
+            <a class="link" href="/"><p class="brand"><span class="" href="">LASUS</span><span class="green">TENNIS</span><span class="ladder-games"> Ladder Games 2023</span></p></a>
+          </nav>
+        </div>
+        <div class="container mt-3 mb-5">
+          <form method="POST" enctype="multipart/form-data" class="justify-content-center">
+            <div class="row justify-content-center container">
+              <div class="col-lg-6 card p-2 mb-5">
+                <h5 class="card-title fw-bold mb-0">PLAYERS HEAD-TO-HEAD</h5>
+                <hr>
+                {{ form.csrf_token }}
+                <div class="row justify-content-center w-100 m-0">
+                    <div class="col-5 px-2">
+                        <div class="input-group mb-3">
+                            {{ form.player_1.label(class_="input-group-text remove") }} {{ form.player_1(class_="form-control text-end left-player") }}
+                        </div>
+                    </div>
+                    <div class="col-2 p-0 vertically-align">
+                        <h6 class="versus">VS</h6>
+                    </div>
+                    <div class="col-5 px-2">
+                        <div class="input-group mb-3">
+                            {{ form.player_2(class_="form-control right-player") }} {{ form.player_2.label(class_="input-group-text remove") }}
+                        </div>
+                    </div>
                 </div>
-                <div class="checkbox-inline col-4">
-                  <input class="form-check-input stat-toggle" type="radio" name="stat" id="doubles">
-                  <label class="form-check-label" for="doubles">
-                    Doubles
-                  </label>
-                </div>
-                <div class="checkbox-inline col-4">
-                  <input class="form-check-input stat-toggle" type="radio" name="stat" id="teammates">
-                  <label class="form-check-label" for="teammates">
-                    Partners
-                  </label>
-                </div>
-              </div>
-              <h5 class="fw-bold mt-3">Head to Head</h5>
-              <div class="singles h2h-div">
-                <div class="row justify-content-center">
-                  <div class="col-2 text-end">
-                    {{ h2h["singles"]["played"] }}
+                <div class="row py-2">
+                  <div class="checkbox-inline col-4">
+                    <input class="form-check-input stat-toggle" type="radio" name="stat" id="singles" checked="checked">
+                    <label class="form-check-label reduce" for="singles">
+                      Singles
+                    </label>
                   </div>
-                  <div class="col-lg-4 col-6">
-                    Played
+                  <div class="checkbox-inline col-4">
+                    <input class="form-check-input stat-toggle" type="radio" name="stat" id="doubles">
+                    <label class="form-check-label reduce" for="doubles">
+                      Doubles
+                    </label>
                   </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["singles"]["played"] }}
+                  <div class="checkbox-inline col-4">
+                    <input class="form-check-input stat-toggle" type="radio" name="stat" id="teammates">
+                    <label class="form-check-label reduce" for="teammates">
+                      Partners
+                    </label>
                   </div>
                 </div>
-                <div class="row justify-content-center">
-                  <div class="col-2 text-end">
-                    {{ h2h["singles"]["player1"] }}
-                  </div>
-                  <div class="col-lg-4 col-6">
-                    Won
-                  </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["singles"]["player2"] }}
-                  </div>
-                </div>
-                {% if h2h["singles"]["player1"] + h2h["singles"]["player2"] != h2h["singles"]["played"] %}
+                <h5 class="fw-bold mt-3">Head to Head</h5>
+                <div class="singles h2h-div">
                   <div class="row justify-content-center">
                     <div class="col-2 text-end">
-                      {{ h2h["singles"]["played"] - h2h["singles"]["player1"] - h2h["singles"]["player2"] }}
+                      {{ h2h["singles"]["played"] }}
                     </div>
                     <div class="col-lg-4 col-6">
-                      Drawn
+                      Played
                     </div>
                     <div class="col-2 text-start">
-                      {{ h2h["singles"]["played"] - h2h["singles"]["player1"] - h2h["singles"]["player2"] }}
+                      {{ h2h["singles"]["played"] }}
                     </div>
                   </div>
-                {% endif %}
-                <div class="row justify-content-center mb-3">
-                  <div class="col-2 text-end">
-                    {{ h2h["singles"]["player2"] }}
+                  <div class="row justify-content-center">
+                    <div class="col-2 text-end">
+                      {{ h2h["singles"]["player1"] }}
+                    </div>
+                    <div class="col-lg-4 col-6">
+                      Won
+                    </div>
+                    <div class="col-2 text-start">
+                      {{ h2h["singles"]["player2"] }}
+                    </div>
                   </div>
-                  <div class="col-lg-4 col-6">
-                    Lost
+                  {% if h2h["singles"]["player1"] + h2h["singles"]["player2"] != h2h["singles"]["played"] %}
+                    <div class="row justify-content-center">
+                      <div class="col-2 text-end">
+                        {{ h2h["singles"]["played"] - h2h["singles"]["player1"] - h2h["singles"]["player2"] }}
+                      </div>
+                      <div class="col-lg-4 col-6">
+                        Drawn
+                      </div>
+                      <div class="col-2 text-start">
+                        {{ h2h["singles"]["played"] - h2h["singles"]["player1"] - h2h["singles"]["player2"] }}
+                      </div>
+                    </div>
+                  {% endif %}
+                  <div class="row justify-content-center mb-3">
+                    <div class="col-2 text-end">
+                      {{ h2h["singles"]["player2"] }}
+                    </div>
+                    <div class="col-lg-4 col-6">
+                      Lost
+                    </div>
+                    <div class="col-2 text-start">
+                      {{ h2h["singles"]["player1"] }}
+                    </div>
                   </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["singles"]["player1"] }}
-                  </div>
+                  {% if h2h["singles"]["played"] != 0 %}
+                    <h5 class="fw-bold">Matches</h5>
+                    {% for match in h2h["singles"]["matches"][::-1] %}
+                      {% if not match.is_challenge %}
+                        {% if match.score1 > match.score2 %}
+                          <p class=""><span class="">WEEK {{ match.week.number }}:</span> <span class="fw-bold">{{ split(match.players_order)[0] }}</span> {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[1] }}</p>
+                        {% elif match.score1 < match.score2 %}
+                          <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} {{ match.score1 }} - {{ match.score2 }} <span class="fw-bold">{{ split(match.players_order)[1] }}</span></p>
+                        {% else %}
+                          <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[1] }}</p>
+                        {% endif %}
+                      {% else %}
+                        {% if match.set3_score1 %}
+                          <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} vs {{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ match.set2_score1 }} - {{ match.set2_score2 }} {{ match.set3_score1 }} - {{ match.set3_score2 }}</p>
+                        {% elif match.set2_score1 %}
+                          <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} vs {{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ match.set2_score1 }} - {{ match.set2_score2 }}</p>
+                        {% else %}
+                          <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} vs {{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }}</p>
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
                 </div>
-                {% if h2h["singles"]["played"] != 0 %}
-                  <h5 class="fw-bold">Matches</h5>
-                  {% for match in h2h["singles"]["matches"][::-1] %}
-                    {% if not match.is_challenge %}
+                <div class="doubles hide h2h-div">
+                  <div class="row justify-content-center">
+                    <div class="col-2 text-end">
+                      {{ h2h["doubles"]["played"] }}
+                    </div>
+                    <div class="col-lg-4 col-6">
+                      Played
+                    </div>
+                    <div class="col-2 text-start">
+                      {{ h2h["doubles"]["played"] }}
+                    </div>
+                  </div>
+                  <div class="row justify-content-center">
+                    <div class="col-2 text-end">
+                      {{ h2h["doubles"]["player1"] }}
+                    </div>
+                    <div class="col-lg-4 col-6">
+                      Won
+                    </div>
+                    <div class="col-2 text-start">
+                      {{ h2h["doubles"]["player2"] }}
+                    </div>
+                  </div>
+                  {% if h2h["doubles"]["player1"] + h2h["doubles"]["player2"] != h2h["doubles"]["played"] %}
+                    <div class="row justify-content-center">
+                      <div class="col-2 text-end">
+                        {{ h2h["doubles"]["played"] - h2h["doubles"]["player1"] - h2h["doubles"]["player2"] }}
+                      </div>
+                      <div class="col-lg-4 col-6">
+                        Drawn
+                      </div>
+                      <div class="col-2 text-start">
+                        {{ h2h["doubles"]["played"] - h2h["doubles"]["player1"] - h2h["doubles"]["player2"] }}
+                      </div>
+                    </div>
+                  {% endif %}
+                  <div class="row justify-content-center mb-3">
+                    <div class="col-2 text-end">
+                      {{ h2h["doubles"]["player2"] }}
+                    </div>
+                    <div class="col-lg-4 col-6">
+                      Lost
+                    </div>
+                    <div class="col-2 text-start">
+                      {{ h2h["doubles"]["player1"] }}
+                    </div>
+                  </div>
+                  {% if h2h["doubles"]["played"] != 0 %}
+                    <h5 class="fw-bold">Matches</h5>
+                    {% for match in h2h["doubles"]["matches"][::-1] %}
                       {% if match.score1 > match.score2 %}
-                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> <span class="fw-bold">{{ split(match.players_order)[0] }}</span> {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[1] }}</p>
+                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> <span class="fw-bold">{{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }}</span> {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
                       {% elif match.score1 < match.score2 %}
-                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} {{ match.score1 }} - {{ match.score2 }} <span class="fw-bold">{{ split(match.players_order)[1] }}</span></p>
+                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} <span class="fw-bold">{{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</span></p>
                       {% else %}
-                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[1] }}</p>
+                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
                       {% endif %}
-                    {% else %}
-                      {% if match.set3_score1 %}
-                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} vs {{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ match.set2_score1 }} - {{ match.set2_score2 }} {{ match.set3_score1 }} - {{ match.set3_score2 }}</p>
-                      {% elif match.set2_score1 %}
-                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} vs {{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ match.set2_score1 }} - {{ match.set2_score2 }}</p>
-                      {% else %}
-                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }} vs {{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }}</p>
-                      {% endif %}
-                    {% endif %}
                   {% endfor %}
-                {% endif %}
-              </div>
-              <div class="doubles hide h2h-div">
-                <div class="row justify-content-center">
-                  <div class="col-2 text-end">
-                    {{ h2h["doubles"]["played"] }}
-                  </div>
-                  <div class="col-lg-4 col-6">
-                    Played
-                  </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["doubles"]["played"] }}
-                  </div>
+                  {% endif %}
                 </div>
-                <div class="row justify-content-center">
-                  <div class="col-2 text-end">
-                    {{ h2h["doubles"]["player1"] }}
-                  </div>
-                  <div class="col-lg-4 col-6">
-                    Won
-                  </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["doubles"]["player2"] }}
-                  </div>
-                </div>
-                {% if h2h["doubles"]["player1"] + h2h["doubles"]["player2"] != h2h["doubles"]["played"] %}
+                <div class="teammates hide h2h-div">
                   <div class="row justify-content-center">
                     <div class="col-2 text-end">
-                      {{ h2h["doubles"]["played"] - h2h["doubles"]["player1"] - h2h["doubles"]["player2"] }}
+                      {{ h2h["teammates"]["played"] }}
                     </div>
                     <div class="col-lg-4 col-6">
-                      Drawn
+                      Played
                     </div>
                     <div class="col-2 text-start">
-                      {{ h2h["doubles"]["played"] - h2h["doubles"]["player1"] - h2h["doubles"]["player2"] }}
+                      {{ h2h["teammates"]["played"] }}
                     </div>
                   </div>
-                {% endif %}
-                <div class="row justify-content-center mb-3">
-                  <div class="col-2 text-end">
-                    {{ h2h["doubles"]["player2"] }}
+                  <div class="row justify-content-center">
+                    <div class="col-2 text-end">
+                      {{ h2h["teammates"]["won"] }}
+                    </div>
+                    <div class="col-lg-4 col-6">
+                      Won
+                    </div>
+                    <div class="col-2 text-start">
+                      {{ h2h["teammates"]["won"] }}
+                    </div>
                   </div>
-                  <div class="col-lg-4 col-6">
-                    Lost
+                  <div class="row justify-content-center mb-3">
+                    <div class="col-2 text-end">
+                      {{ h2h["teammates"]["played"] - h2h["teammates"]["won"] }}
+                    </div>
+                    <div class="col-lg-4 col-6">
+                      Lost
+                    </div>
+                    <div class="col-2 text-start">
+                      {{ h2h["teammates"]["played"] - h2h["teammates"]["won"] }}
+                    </div>
                   </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["doubles"]["player1"] }}
-                  </div>
+                  {% if h2h["teammates"]["played"] != 0 %}
+                    <h5 class="fw-bold">Matches</h5>
+                    {% for match in h2h["teammates"]["matches"][::-1] %}
+                      {% if match.score1 > match.score2 %}
+                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> <span class="fw-bold">{{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }}</span> {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
+                      {% elif match.score1 < match.score2 %}
+                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} <span class="fw-bold">{{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</span></p>
+                      {% else %}
+                        <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
                 </div>
-                {% if h2h["doubles"]["played"] != 0 %}
-                  <h5 class="fw-bold">Matches</h5>
-                  {% for match in h2h["doubles"]["matches"][::-1] %}
-                    {% if match.score1 > match.score2 %}
-                      <p class=""><span class="">WEEK {{ match.week.number }}:</span> <span class="fw-bold">{{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }}</span> {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
-                    {% elif match.score1 < match.score2 %}
-                      <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} <span class="fw-bold">{{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</span></p>
-                    {% else %}
-                      <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
-                    {% endif %}
-                {% endfor %}
-                {% endif %}
-              </div>
-              <div class="teammates hide h2h-div">
-                <div class="row justify-content-center">
-                  <div class="col-2 text-end">
-                    {{ h2h["teammates"]["played"] }}
+                <div class="row justify-content-center mb-2">
+                  <div class="col">
+                    <button class="btn btn-dark" id="submit" name="submit" type="submit">Change players</button>
                   </div>
-                  <div class="col-lg-4 col-6">
-                    Played
-                  </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["teammates"]["played"] }}
-                  </div>
-                </div>
-                <div class="row justify-content-center">
-                  <div class="col-2 text-end">
-                    {{ h2h["teammates"]["won"] }}
-                  </div>
-                  <div class="col-lg-4 col-6">
-                    Won
-                  </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["teammates"]["won"] }}
-                  </div>
-                </div>
-                <div class="row justify-content-center mb-3">
-                  <div class="col-2 text-end">
-                    {{ h2h["teammates"]["played"] - h2h["teammates"]["won"] }}
-                  </div>
-                  <div class="col-lg-4 col-6">
-                    Lost
-                  </div>
-                  <div class="col-2 text-start">
-                    {{ h2h["teammates"]["played"] - h2h["teammates"]["won"] }}
-                  </div>
-                </div>
-                {% if h2h["teammates"]["played"] != 0 %}
-                  <h5 class="fw-bold">Matches</h5>
-                  {% for match in h2h["teammates"]["matches"][::-1] %}
-                    {% if match.score1 > match.score2 %}
-                      <p class=""><span class="">WEEK {{ match.week.number }}:</span> <span class="fw-bold">{{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }}</span> {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
-                    {% elif match.score1 < match.score2 %}
-                      <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} <span class="fw-bold">{{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</span></p>
-                    {% else %}
-                      <p class=""><span class="">WEEK {{ match.week.number }}:</span> {{ split(match.players_order)[0] }}/{{ split(match.players_order)[1] }} {{ match.score1 }} - {{ match.score2 }} {{ split(match.players_order)[2] }}/{{ split(match.players_order)[3] }}</p>
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
-              </div>
-              <div class="row justify-content-center mb-2">
-                <div class="col">
-                  <button class="btn btn-dark" id="submit" name="submit" type="submit">Change players</button>
                 </div>
               </div>
             </div>
-          </div>
-      </form>
+        </form>
+        </div>
       </div>
-      <hr>
-      <p>© LASUSTECH Tennis Club {{ year }}</p>
+      <div class="footer">
+        <hr>
+        <p class="pb-2">© LASUSTECH Tennis Club {{ year }}</p>
+      </div>
     </div>
   </body>
 </html>
